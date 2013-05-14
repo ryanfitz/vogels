@@ -1,0 +1,32 @@
+{
+  "name": "vogels",
+  "version": "0.0.0",
+  "author": "Ryan Fitzgerald <ryan@codebrewstudios.com>",
+  "description": "DynamoDB data mapper",
+  "main": "index.js",
+  "scripts": {
+    "start": "node bin/server-master -c config/development.json",
+    "test": "grunt test"
+  },
+  "repository": "git://github.com/Wantworthy/gallery-service.git",
+  "keywords": [
+    "datamapper",
+    "DynamoDB",
+    "aws",
+    "amazon",
+    "nosql"
+  ],
+  "license": "MIT",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "mocha": "~1.9.0",
+    "chai": "~1.6.0",
+    "grunt-simple-mocha": "~0.4.0",
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.4.3",
+    "grunt-regarde": "~0.1.1",
+    "sinon": "~1.7.0",
+    "grunt-cli": "~0.1.7",
+  }
+}
