@@ -1,11 +1,9 @@
 'use strict';
 
 var vogels = require('../index'),
-AWS    = vogels.AWS;
+    AWS    = vogels.AWS;
 
-AWS.config.update(
-  {accessKeyId: 'AKIAINAAVWBS5XQ4AISQ', secretAccessKey: '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', region : 'us-east-1'}
-);
+AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
 
 var Store = vogels.define('Dev_Store', function (schema) {
   schema.String('domain', {hashKey: true});
