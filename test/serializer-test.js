@@ -1,7 +1,11 @@
 'use strict';
 
 var serializer = require('../lib/serializer'),
+    chai = require('chai'),
+    expect = chai.expect,
     Schema = require('../lib/schema');
+
+chai.should();
 
 describe('Serializer', function () {
   var schema;
@@ -138,6 +142,15 @@ describe('Serializer', function () {
       item.should.eql({scores: {NS: ['2']}});
     });
 
+    it('should return null', function () {
+      schema.String('email');
+      schema.NumberSet('scores');
+
+      var item = serializer.serializeItem(schema, null);
+
+      expect(item).to.be.null;
+    });
+
   });
 
   describe('#deserializeItem', function () {
@@ -199,6 +212,15 @@ describe('Serializer', function () {
       var item = serializer.deserializeItem(schema, itemResp);
 
       item.nums.should.eql([18, 22, 23]);
+    });
+
+    it('should return null', function () {
+      schema.String('email');
+      schema.NumberSet('nums');
+
+      var item = serializer.deserializeItem(schema, null);
+
+      expect(item).to.be.null;
     });
 
   });
