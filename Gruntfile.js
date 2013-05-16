@@ -37,6 +37,11 @@ module.exports = function(grunt) {
         tasks: ['jshint:test', 'simplemocha'],
         spawn: true
       },
+      examples: {
+        files: '<%= jshint.examples.src %>',
+        tasks: ['jshint:examples'],
+        spawn: true
+      }
     },
 
     simplemocha: {

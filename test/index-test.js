@@ -1,7 +1,7 @@
 'use strict';
 
 var vogels = require('../index'),
-    Table = require('../lib/table'),
+    Table  = require('../lib/table'),
     Schema = require('../lib/schema'),
     chai   = require('chai'),
     expect = chai.expect;
@@ -23,23 +23,25 @@ describe('vogels', function () {
       });
     });
 
-    it('should return new instance of a table', function () {
+    it('should have config method', function () {
       var Account = vogels.define('Account');
 
-      Account.table.should.be.instanceof(Table);
+      Account.config({tableName: 'test-accounts'});
+
+      Account.config().name.should.equal('test-accounts');
     });
 
     it('should configure table name as accounts', function () {
       var Account = vogels.define('Account');
 
-      Account.table.config.name.should.equal('accounts');
+      Account.config().name.should.equal('accounts');
     });
 
     it('should return new account item', function () {
       var Account = vogels.define('Account');
 
       var acc = new Account({name: 'Test Acc'});
-      acc.table.should.equal(Account.table);
+      acc.table.should.be.instanceof(Table);
     });
 
   });
