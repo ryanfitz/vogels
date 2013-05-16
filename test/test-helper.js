@@ -1,6 +1,7 @@
 'use strict';
 
-var sinon = require('sinon');
+var sinon = require('sinon'),
+    Table = require('../lib/table');
 
 exports.mockDynamoDB = function () {
   var dynamodb = {
@@ -24,6 +25,10 @@ exports.mockSerializer = function () {
   };
 
   return serializer;
+};
+
+exports.mockTable = function () {
+  return sinon.createStubInstance(Table);
 };
 
 exports.fakeUUID = function () {
