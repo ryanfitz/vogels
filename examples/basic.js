@@ -5,31 +5,26 @@ var vogels = require('../index'),
 
 AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
 
-var Store = vogels.define('Dev_Store', function (schema) {
-  schema.String('domain', {hashKey: true});
+var Account = vogels.define('Account', function (schema) {
+  schema.String('email', {hashKey: true});
   schema.String('name');
-  schema.Number('productCount');
+  schema.Number('age');
 });
 
-Store.config({tableName: 'Dev_Stores'});
-
-Store.get('katespade.com', function (err, str) {
-  console.log('got', err, str.get());
+Account.get('test@example.com', function (err, acc) {
+  if(err) {
+    console.log('got error', err);
+  } else if (acc) {
+    console.log('got account', acc.get());
+  } else {
+    console.log('account not found');
+  }
 });
 
-Store.create({domain: 'foobars.com', name : 'Foo Bars', productCount: 15}, function (err, fooStore) {
-  console.log('created', err, fooStore.get());
+Account.create({email: 'test@example.com', name : 'Example Acc', age: 21}, function (err, acc) {
+  console.log('account created', acc.get());
 
-  fooStore.set({productCount: 22}).update(function (err) {
-    console.log('updated', err, fooStore.get());
-
-    fooStore.destroy(function () {
-      console.log('destroyed store');
-    });
-
+  acc.set({name: 'Example Account', age: 25}).update(function (err) {
+    console.log('account updated', err, acc.get());
   });
 });
-
-//Store.destroy('foobars.com', function (err) {
-//console.log('destroyed',  err);
-//});
