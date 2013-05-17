@@ -103,5 +103,14 @@ describe('vogels', function () {
       Post.dynamodb.should.eq(dynamodb);
     });
 
+    it('should continue to use globally set dynamodb driver', function () {
+      var dynamodb = helper.mockDynamoDB();
+      vogels.dynamoDriver(dynamodb);
+
+      var Account = vogels.define('Account');
+
+      Account.dynamodb.should.eq(dynamodb);
+    });
+
   });
 });
