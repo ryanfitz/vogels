@@ -21,15 +21,38 @@ var printResults = function (err, resp) {
   } else {
     console.log('Found', resp.Count, 'items');
     console.log(util.inspect(_.pluck(resp.Items, 'attrs')));
+
+    if(resp.ConsumedCapacity) {
+      console.log('----------------------------------------------------------------------');
+      console.log('Query consumed: ', resp.ConsumedCapacity);
+    }
   }
+
   console.log('----------------------------------------------------------------------');
 };
 
-Account.query('Test').where('email').beginsWith('foo').exec(printResults);
+// Basic query against hash key
+Account.query('Test').exec(printResults);
 
+// Run query limiting returned items to 3
+Account.query('Test').limit(3).exec(printResults);
+
+// Query with rang key condition
+Account.query('Test')
+  .where('email').beginsWith('foo')
+  .exec(printResults);
+
+// Run query returning only email and created attributes
+// also returns consumed capacity query took
+Account.query('Test')
+  .where('email').gte('a@example.com')
+  .attributes(['email','created'])
+  .returnConsumedCapacity()
+  .exec(printResults);
+
+// Run query against secondary index
 Account.query('Test')
   .usingIndex('createdIndex')
-  .where('created')
-  .lt(Date.now())
+  .where('created').lt(Date.now())
   .descending()
   .exec(printResults);

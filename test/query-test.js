@@ -145,6 +145,41 @@ describe('Query', function () {
     });
   });
 
+  describe('#select', function () {
+
+    it('should set select Key', function () {
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+      schema.Date('created', {secondaryIndex: true});
+
+      var query = new Query('tim', table, serializer).select('COUNT');
+
+      query.request.Count.should.eql('COUNT');
+    });
+  });
+
+  describe('#ReturnConsumedCapacity', function () {
+
+    it('should set return consumed capacity Key to passed in value', function () {
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+      schema.Date('created', {secondaryIndex: true});
+
+      var query = new Query('tim', table, serializer).returnConsumedCapacity('TOTAL');
+      query.request.ReturnConsumedCapacity.should.eql('TOTAL');
+    });
+
+    it('should set return consumed capacity Key', function () {
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+      schema.Date('created', {secondaryIndex: true});
+
+      var query = new Query('tim', table, serializer).returnConsumedCapacity();
+
+      query.request.ReturnConsumedCapacity.should.eql('TOTAL');
+    });
+  });
+
   describe('#where', function () {
     var query;
 
