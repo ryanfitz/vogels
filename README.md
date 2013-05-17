@@ -3,7 +3,7 @@ vogels
 
 [![Build Status](https://travis-ci.org/ryanfitz/vogels.png?branch=master)](https://travis-ci.org/ryanfitz/vogels)
 
-vogels is a DynamoDB datamapper for [node.js][2].
+vogels is a DynamoDB datamapper for [node.js][1].
 
 ## Installation
 
