@@ -103,5 +103,17 @@ describe('schema', function () {
       expect(err).to.exist;
     });
 
+    it('should return no error for valid date object', function() {
+      schema.Date('created', {hashKey: true});
+
+      expect(schema.validate({created: new Date()})).to.be.null;
+    });
+
+    it('should return no error when using Date.now', function() {
+      schema.Date('created', {hashKey: true});
+
+      expect(schema.validate({created: Date.now()})).to.be.null;
+    });
+
   });
 });
