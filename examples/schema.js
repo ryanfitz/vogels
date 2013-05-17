@@ -1,3 +1,5 @@
+'use strict';
+
 var vogels = require('vogels');
 
 var Account = vogels.define('Account', function (schema) {
@@ -28,6 +30,7 @@ var publishedPost = new BlogPost({
   published : new Date('2013-04-17 10:30:00')
 });
 
+
 var unpublishedPost = new BlogPost({
   email : acc.email,
   title : 'Expanding the Cloud: Spaceships!',
@@ -38,14 +41,18 @@ acc.save(function (err){
   if(err) {console.log('error saving account', err);}
 
   // account created!
+  //save both posts
+
+  unpublishedPost.save();
+  publishedPost.save();
 });
 
 Account.get('vogels@test.com', function (err, account) {
   if(err) {console.log('error getting account', err);}
 
   // got account
+  console.log('Found account', account);
 });
 
-BlogPost.query('vogels@test.com').exec(callback); // Get all blog posts created by vogels
-
-BlogPost.query('vogels@test.com').usingIndex('published').exec(callback); // Get all published blogposts by vogels
+BlogPost.query('vogels@test.com').exec(console.log); // Get all blog posts created by vogels
+BlogPost.query('vogels@test.com').usingIndex('published').exec(console.log); // Get all published blogposts by vogels
