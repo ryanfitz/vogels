@@ -1,6 +1,10 @@
 'use strict';
 
-var Schema = require('../lib/schema');
+var Schema = require('../lib/schema'),
+    chai   = require('chai'),
+    expect = chai.expect;
+
+chai.should();
 
 describe('schema', function () {
   var schema;
@@ -83,4 +87,21 @@ describe('schema', function () {
     });
   });
 
+  describe('#validate', function () {
+
+    it('should return no err for string', function() {
+      schema.String('email', {hashKey: true});
+
+      expect(schema.validate({email: 'foo@bar.com'})).to.be.null;
+    });
+
+    it('should return err when hashkey isnt set', function() {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+
+      var err = schema.validate({name : 'foo bar'});
+      expect(err).to.exist;
+    });
+
+  });
 });
