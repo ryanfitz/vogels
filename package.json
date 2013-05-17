@@ -7,7 +7,7 @@
   "scripts": {
     "test": "grunt test"
   },
-  "repository": "git://github.com/Wantworthy/gallery-service.git",
+  "repository": "git://github.com/ryanfitz/vogels.git",
   "keywords": [
     "datamapper",
     "DynamoDB",
