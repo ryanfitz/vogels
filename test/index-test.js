@@ -1,6 +1,7 @@
 'use strict';
 
 var vogels = require('../index'),
+    helper = require('./test-helper'),
     Table  = require('../lib/table'),
     Schema = require('../lib/schema'),
     chai   = require('chai'),
@@ -69,6 +70,37 @@ describe('vogels', function () {
 
     it('should return null', function () {
       expect(vogels.model('Person')).to.be.null;
+    });
+
+  });
+
+  describe('model config', function () {
+    it('should configure set dynamodb driver', function () {
+      var Account = vogels.define('Account');
+
+      Account.config({tableName: 'test-accounts' });
+
+      Account.config().name.should.eq('test-accounts');
+    });
+
+    it('should configure set dynamodb driver', function () {
+      var Account = vogels.define('Account');
+
+      var dynamodb = helper.mockDynamoDB();
+      Account.config({dynamodb: dynamodb });
+
+      Account.dynamodb.should.eq(dynamodb);
+    });
+
+    it('should globally set dynamodb driver for all models', function () {
+      var Account = vogels.define('Account');
+      var Post = vogels.define('Post');
+
+      var dynamodb = helper.mockDynamoDB();
+      vogels.dynamoDriver(dynamodb);
+
+      Account.dynamodb.should.eq(dynamodb);
+      Post.dynamodb.should.eq(dynamodb);
     });
 
   });
