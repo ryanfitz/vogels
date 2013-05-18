@@ -151,6 +151,13 @@ describe('Serializer', function () {
       expect(item).to.be.null;
     });
 
+    it('should convert string set to a string', function () {
+      schema.StringSet('names');
+
+      var item = serializer.serializeItem(schema, {names: 'Bob'}, {convertSets: true});
+
+      item.should.eql({names: {S: 'Bob'}});
+    });
   });
 
   describe('#deserializeItem', function () {

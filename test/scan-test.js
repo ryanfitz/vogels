@@ -157,6 +157,7 @@ describe('Scan', function () {
       schema.String('name', {hashKey: true});
       schema.String('email', {rangeKey: true});
       schema.Date('created', {secondaryIndex: true});
+      schema.NumberSet('scores');
     });
 
     it('should have equals clause', function() {
@@ -224,6 +225,13 @@ describe('Scan', function () {
       scan = scan.where('email').contains('foo@example.com');
 
       scan.request.ScanFilter.email.should.eql({AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'CONTAINS'});
+    });
+
+    it('should not pass a number set when making contains call', function() {
+      serializer.serializeItem.withArgs(schema, {scores: 2}, {convertSets: true}).returns({scores: {N: '2'}});
+      scan = scan.where('scores').contains(2);
+
+      scan.request.ScanFilter.scores.should.eql({AttributeValueList: [{N: '2'}], ComparisonOperator: 'CONTAINS'});
     });
 
     it('should have not contains clause', function() {

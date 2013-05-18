@@ -12,6 +12,7 @@ var Account = vogels.define('Account', function (schema) {
   schema.String('email', {rangeKey: true});
   schema.Date('created', {secondaryIndex: true});
   schema.Number('age');
+  schema.NumberSet('scores');
 });
 
 var printResults = function (err, resp) {
@@ -48,4 +49,8 @@ Account.scan()
   .where('email').gte('f@example.com')
   .attributes(['email','created'])
   .returnConsumedCapacity()
+  .exec(printResults);
+
+Account.scan()
+  .where('scores').contains(2)
   .exec(printResults);
