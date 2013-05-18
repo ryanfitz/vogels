@@ -167,6 +167,14 @@ describe('Scan', function () {
       scan.request.ScanFilter.email.should.eql({AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'EQ'});
     });
 
+    it('should have not equals clause', function() {
+      serializer.serializeItem.returns({email: {S: 'foo@example.com'}});
+
+      scan = scan.where('email').ne('foo@example.com');
+
+      scan.request.ScanFilter.email.should.eql({AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'NE'});
+    });
+
     it('should have less than or equal clause', function() {
       serializer.serializeItem.returns({email: {S: 'foo@example.com'}});
 
@@ -197,6 +205,44 @@ describe('Scan', function () {
       scan = scan.where('email').gt('foo@example.com');
 
       scan.request.ScanFilter.email.should.eql({AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'GT'});
+    });
+
+    it('should have not null clause', function() {
+      scan = scan.where('email').notNull();
+
+      scan.request.ScanFilter.email.should.eql({ComparisonOperator: 'NOT_NULL'});
+    });
+
+    it('should have null clause', function() {
+      scan = scan.where('email').null();
+
+      scan.request.ScanFilter.email.should.eql({ComparisonOperator: 'NULL'});
+    });
+
+    it('should have contains clause', function() {
+      serializer.serializeItem.returns({email: {S: 'foo@example.com'}});
+      scan = scan.where('email').contains('foo@example.com');
+
+      scan.request.ScanFilter.email.should.eql({AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'CONTAINS'});
+    });
+
+    it('should have not contains clause', function() {
+      serializer.serializeItem.returns({email: {S: 'foo@example.com'}});
+      scan = scan.where('email').notContains('foo@example.com');
+
+      scan.request.ScanFilter.email.should.eql({AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'NOT_CONTAINS'});
+    });
+
+    it('should have within clause', function() {
+      serializer.serializeItem.withArgs(schema, {email: 'foo@example.com'}).returns({email: {S: 'foo@example.com'}});
+      serializer.serializeItem.withArgs(schema, {email: 'test@example.com'}).returns({email: {S: 'test@example.com'}});
+
+      scan = scan.where('email').within(['foo@example.com', 'test@example.com']);
+
+      scan.request.ScanFilter.email.should.eql({
+        AttributeValueList: [{S: 'foo@example.com'}, {S: 'test@example.com'}],
+        ComparisonOperator: 'IN'
+      });
     });
 
     it('should have begins with clause', function() {
