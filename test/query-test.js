@@ -20,7 +20,7 @@ describe('Query', function () {
 
   describe('#exec', function () {
 
-    it('should do something', function (done) {
+    it('should run query against table', function (done) {
       schema.String('name', {hashKey: true});
       schema.String('email', {rangeKey: true});
 

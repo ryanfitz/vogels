@@ -5,6 +5,7 @@ var helper = require('./test-helper'),
     Table  = require('../lib/table'),
     Schema = require('../lib/schema'),
     Query  = require('../lib//query'),
+    Scan   = require('../lib//scan'),
     Item   = require('../lib/item');
 
 describe('table', function () {
@@ -148,6 +149,18 @@ describe('table', function () {
       table = new Table('accounts', schema, serializer, dynamodb);
 
       table.query('Bob').should.be.instanceof(Query);
+    });
+  });
+
+  describe('#scan', function () {
+
+    it('should return scan object', function () {
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      table.scan().should.be.instanceof(Scan);
     });
   });
 
