@@ -170,6 +170,59 @@ describe('table', function () {
         done();
       });
     });
+
+    it('should update with passed in options', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+      schema.Number('age');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        Key : {
+          email : {S : 'test@test.com'}
+        },
+        AttributeUpdates : {
+          email : {Action : 'PUT', Value: {S : 'test@test.com'}},
+          name  : {Action : 'PUT', Value: {S : 'Tim Test'}},
+          age   : {Action : 'PUT', Value: {N : '23'}}
+        },
+        ReturnValues: 'ALL_OLD',
+        Expected : {
+          name : {S : 'Foo Bar'}
+        }
+      };
+
+      var returnedAttributes = {
+        email  : {S : 'test@test.com'},
+        name   : {S : 'Tim Test'},
+        age    : {N : '25'},
+        scores : {NS : ['97', '86']}
+      };
+
+      var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
+
+      serializer.buildKey.returns(request.Key);
+      serializer.serializeItemForUpdate.withArgs(schema, 'PUT', item).returns(request.AttributeUpdates);
+
+      var returnedItem = _.merge({}, item, {scores: [97, 86]});
+      serializer.deserializeItem.withArgs(schema, returnedAttributes).returns(returnedItem);
+      dynamodb.updateItem.withArgs(request).yields(null, {Attributes: returnedAttributes});
+
+      serializer.serializeItem.withArgs(schema, {name: 'Foo Bar'}).returns(request.Expected);
+
+      table.update(item, {ReturnValues: 'ALL_OLD', expected: {name: 'Foo Bar'}}, function (err, account) {
+        account.should.be.instanceof(Item);
+
+        account.get('email').should.equal('test@test.com');
+        account.get('name').should.equal('Tim Test');
+        account.get('age').should.equal(23);
+        account.get('scores').should.eql([97, 86]);
+
+        done();
+      });
+    });
   });
 
   describe('#query', function () {
@@ -217,6 +270,138 @@ describe('table', function () {
       serializer.buildKey.returns(request.Key);
 
       table.destroy('test@test.com', function () {
+        serializer.buildKey.calledWith('test@test.com', null, schema).should.be.true;
+        dynamodb.deleteItem.calledWith(request).should.be.true;
+
+        done();
+      });
+    });
+
+    it('should take optional params', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+      schema.Number('age');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        Key : {
+          email : {S : 'test@test.com'}
+        },
+        ReturnValues : 'ALL_OLD'
+      };
+
+      dynamodb.deleteItem.yields(null, {});
+
+      serializer.buildKey.returns(request.Key);
+
+      table.destroy('test@test.com', {ReturnValues: 'ALL_OLD'}, function () {
+        serializer.buildKey.calledWith('test@test.com', null, schema).should.be.true;
+        dynamodb.deleteItem.calledWith(request).should.be.true;
+
+        done();
+      });
+    });
+
+    it('should parse and return attributes', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+      schema.Number('age');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        Key : {
+          email : {S : 'test@test.com'}
+        },
+        ReturnValues : 'ALL_OLD'
+      };
+
+      var returnedAttributes = {
+        email : {S : 'test@test.com'},
+        name  : {S : 'Foo Bar'}
+      };
+
+      dynamodb.deleteItem.yields(null, {Attributes: returnedAttributes});
+
+      serializer.buildKey.returns(request.Key);
+      serializer.deserializeItem.withArgs(schema, returnedAttributes).returns(
+        {email : 'test@test.com', name: 'Foo Bar'
+      });
+
+      table.destroy('test@test.com', {ReturnValues: 'ALL_OLD'}, function (err, item) {
+        serializer.buildKey.calledWith('test@test.com', null, schema).should.be.true;
+        dynamodb.deleteItem.calledWith(request).should.be.true;
+
+        item.get('name').should.equal('Foo Bar');
+
+        done();
+      });
+    });
+
+    it('should accept hashkey rangekey and options', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name', {rangeKey: true});
+      schema.Number('age');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        Key : {
+          email : {S : 'test@test.com'},
+          name : {S : 'Foo Bar'}
+        },
+        ReturnValues : 'ALL_OLD'
+      };
+
+      var returnedAttributes = {
+        email : {S : 'test@test.com'},
+        name  : {S : 'Foo Bar'}
+      };
+
+      dynamodb.deleteItem.yields(null, {Attributes: returnedAttributes});
+
+      serializer.buildKey.returns(request.Key);
+      serializer.deserializeItem.withArgs(schema, returnedAttributes).returns(
+        {email : 'test@test.com', name: 'Foo Bar'
+      });
+
+      table.destroy('test@test.com', 'Foo Bar', {ReturnValues: 'ALL_OLD'}, function (err, item) {
+        serializer.buildKey.calledWith('test@test.com', 'Foo Bar', schema).should.be.true;
+        dynamodb.deleteItem.calledWith(request).should.be.true;
+
+        item.get('name').should.equal('Foo Bar');
+
+        done();
+      });
+    });
+
+    it('should serialize expected option', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+      schema.Number('age');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        Key : {
+          email : {S : 'test@test.com'}
+        },
+        Expected : {
+          name : {S : 'Foo Bar'}
+        }
+      };
+
+      dynamodb.deleteItem.yields(null, {});
+
+      serializer.serializeItem.withArgs(schema, {name: 'Foo Bar'}).returns(request.Expected);
+      serializer.buildKey.returns(request.Key);
+
+      table.destroy('test@test.com', {expected: {name : 'Foo Bar'}}, function () {
         serializer.buildKey.calledWith('test@test.com', null, schema).should.be.true;
         dynamodb.deleteItem.calledWith(request).should.be.true;
 

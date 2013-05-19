@@ -12,7 +12,7 @@ var Account = vogels.define('Account', function (schema) {
   schema.Date('created', {default: Date.now});
 });
 
-Account.get('test@example.com', function (err, acc) {
+var printAccountInfo = function (err, acc) {
   if(err) {
     console.log('got error', err);
   } else if (acc) {
@@ -20,8 +20,15 @@ Account.get('test@example.com', function (err, acc) {
   } else {
     console.log('account not found');
   }
-});
+};
 
+// Simple get request
+Account.get('test@example.com', printAccountInfo);
+
+// Consistent Read get request
+Account.get('foo@example.com', {ConsistentRead: true}, printAccountInfo);
+
+// Create an account
 Account.create({email: 'test11@example.com', name : 'test 11', age: 21}, function (err, acc) {
   console.log('account created', acc.get());
 
