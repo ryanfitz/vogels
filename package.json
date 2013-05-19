@@ -19,7 +19,8 @@
   "dependencies": {
     "aws-sdk": "~1.1.0",
     "lodash": "~1.2.1",
-    "joi": "~0.3.4"
+    "joi": "~0.3.4",
+    "node-uuid": "~1.4.0"
   },
   "devDependencies": {
     "mocha": "~1.9.0",

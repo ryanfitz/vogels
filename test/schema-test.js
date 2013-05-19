@@ -88,6 +88,43 @@ describe('schema', function () {
     });
   });
 
+  describe('#UUID', function () {
+    it('should set as uuid with default uuid function', function () {
+      schema.UUID('id');
+
+      schema.attrs.should.have.keys(['id']);
+      schema.attrs.id.options.default.should.exist;
+      schema.attrs.id.type.type.should.equal('UUID');
+    });
+
+    it('should set as uuid with default as given value', function () {
+      schema.UUID('id', {default : '123'});
+
+      schema.attrs.should.have.keys(['id']);
+      schema.attrs.id.options.default.should.equal('123');
+      schema.attrs.id.type.type.should.equal('UUID');
+    });
+  });
+
+  describe('#TimeUUID', function () {
+    it('should set as TimeUUID with default v1 uuid function', function () {
+      schema.TimeUUID('timeid');
+
+      schema.attrs.should.have.keys(['timeid']);
+      schema.attrs.timeid.options.default.should.exist;
+      schema.attrs.timeid.type.type.should.equal('TimeUUID');
+    });
+
+    it('should set as uuid with default as given value', function () {
+      schema.TimeUUID('stamp', {default : '123'});
+
+      schema.attrs.should.have.keys(['stamp']);
+      schema.attrs.stamp.options.default.should.equal('123');
+      schema.attrs.stamp.type.type.should.equal('TimeUUID');
+    });
+  });
+
+
   describe('#validate', function () {
 
     it('should return no err for string', function() {

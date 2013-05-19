@@ -142,6 +142,24 @@ describe('Serializer', function () {
       item.should.eql({scores: {NS: ['2']}});
     });
 
+    it('should serialize uuid attribute', function () {
+      schema.UUID('id');
+
+      var id = '1234-5123-2342-1234';
+      var item = serializer.serializeItem(schema, {id: id});
+
+      item.should.eql({id: {S: id}});
+    });
+
+    it('should serialize TimeUUId attribute', function () {
+      schema.TimeUUID('timeid');
+
+      var timeid = '1234-5123-2342-1234';
+      var item = serializer.serializeItem(schema, {timeid: timeid});
+
+      item.should.eql({timeid: {S: timeid}});
+    });
+
     it('should return null', function () {
       schema.String('email');
       schema.NumberSet('scores');
@@ -228,6 +246,26 @@ describe('Serializer', function () {
       var item = serializer.deserializeItem(schema, null);
 
       expect(item).to.be.null;
+    });
+
+    it('should parse uuid attribute', function () {
+      schema.UUID('id');
+
+      var itemResp = {id : {S: '1234-5678-9012'} };
+
+      var item = serializer.deserializeItem(schema, itemResp);
+
+      item.id.should.equal('1234-5678-9012');
+    });
+
+    it('should parse time uuid attribute', function () {
+      schema.TimeUUID('stamp');
+
+      var itemResp = {stamp : {S: '1234-5678-9012'} };
+
+      var item = serializer.deserializeItem(schema, itemResp);
+
+      item.stamp.should.equal('1234-5678-9012');
     });
 
   });
