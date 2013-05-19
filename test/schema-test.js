@@ -2,7 +2,8 @@
 
 var Schema = require('../lib/schema'),
     chai   = require('chai'),
-    expect = chai.expect;
+    expect = chai.expect,
+    sinon  = require('sinon');
 
 chai.should();
 
@@ -115,5 +116,81 @@ describe('schema', function () {
       expect(schema.validate({created: Date.now()})).to.be.null;
     });
 
+  });
+
+  describe('#defaults', function () {
+    it('should return default option set on hashkey', function () {
+      schema.String('email', {hashKey: true, default: 'foo@bar.com'});
+
+      schema.defaults().should.have.keys(['email']);
+    });
+
+    it('should return attributes that have defautls', function () {
+      schema.String('email', {hashKey: true});
+      schema.String('name', {default: 'Foo Bar'});
+      schema.Number('age', {default: 3});
+
+      schema.defaults().should.have.keys(['name', 'age']);
+    });
+
+    it('should return empty object when no defaults exist', function () {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+      schema.Number('age');
+
+      schema.defaults().should.be.empty;
+    });
+  });
+
+  describe('#applyDefaults', function () {
+    it('should apply default values', function () {
+      schema.String('email', {hashKey: true});
+      schema.String('name', {default: 'Foo Bar'});
+      schema.Number('age', {default: 3});
+
+      var d = schema.applyDefaults({email: 'foo@bar.com'});
+
+      d.email.should.equal('foo@bar.com');
+      d.name.should.equal('Foo Bar');
+      d.age.should.equal(3);
+    });
+
+    it('should return result of default functions', function () {
+      var clock = sinon.useFakeTimers(Date.now());
+
+      schema.String('email', {hashKey: true});
+      schema.Date('created', {default: Date.now});
+
+      var d = schema.applyDefaults({email: 'foo@bar.com'});
+
+      d.created.should.equal(Date.now());
+
+      clock.restore();
+    });
+
+    it('should modify passed in data', function () {
+      schema.String('email', {hashKey: true});
+      schema.String('name', {default: 'Foo Bar'});
+      schema.Number('age', {default: 3});
+
+      var data = {email : 'test@example.com'};
+      schema.applyDefaults(data);
+
+      data.email.should.equal('test@example.com');
+      data.name.should.equal('Foo Bar');
+      data.age.should.equal(3);
+    });
+
+    it('should modify anything when no defaults are set', function () {
+      schema.String('email');
+      schema.String('name');
+      schema.Number('age');
+
+      var d = schema.applyDefaults({email: 'foo@bar.com'});
+
+      d.email.should.equal('foo@bar.com');
+      expect(d.name).to.not.exist;
+      expect(d.age).to.not.exist;
+    });
   });
 });

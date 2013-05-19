@@ -34,7 +34,7 @@ var publishedPost = new BlogPost({
 var unpublishedPost = new BlogPost({
   email : acc.email,
   title : 'Expanding the Cloud: Spaceships!',
-  content : 'Today, I’m thrilled to announce...',
+  content : 'Today, I’m thrilled to announce...'
 });
 
 acc.save(function (err){

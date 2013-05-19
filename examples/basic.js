@@ -9,6 +9,7 @@ var Account = vogels.define('Account', function (schema) {
   schema.String('email', {hashKey: true});
   schema.String('name');
   schema.Number('age');
+  schema.Date('created', {default: Date.now});
 });
 
 Account.get('test@example.com', function (err, acc) {
@@ -21,10 +22,10 @@ Account.get('test@example.com', function (err, acc) {
   }
 });
 
-Account.create({email: 'test@example.com', name : 'Example Acc', age: 21}, function (err, acc) {
+Account.create({email: 'test11@example.com', name : 'test 11', age: 21}, function (err, acc) {
   console.log('account created', acc.get());
 
-  acc.set({name: 'Example Account', age: 25}).update(function (err) {
+  acc.set({name: 'Test 11', age: 25}).update(function (err) {
     console.log('account updated', err, acc.get());
   });
 });

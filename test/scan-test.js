@@ -241,11 +241,11 @@ describe('Scan', function () {
       scan.request.ScanFilter.email.should.eql({AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'NOT_CONTAINS'});
     });
 
-    it('should have within clause', function() {
+    it('should have in clause', function() {
       serializer.serializeItem.withArgs(schema, {email: 'foo@example.com'}).returns({email: {S: 'foo@example.com'}});
       serializer.serializeItem.withArgs(schema, {email: 'test@example.com'}).returns({email: {S: 'test@example.com'}});
 
-      scan = scan.where('email').within(['foo@example.com', 'test@example.com']);
+      scan = scan.where('email').in(['foo@example.com', 'test@example.com']);
 
       scan.request.ScanFilter.email.should.eql({
         AttributeValueList: [{S: 'foo@example.com'}, {S: 'test@example.com'}],

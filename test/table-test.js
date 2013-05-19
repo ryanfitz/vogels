@@ -87,6 +87,38 @@ describe('table', function () {
         done();
       });
     });
+
+    it('should call apply defaults', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name', {default: 'Foo'});
+      schema.Number('age');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        Item : {
+          email : {S : 'test@test.com'},
+          name  : {S : 'Foo'},
+          age   : {N : '23'}
+        }
+      };
+
+      var item = {email : 'test@test.com', name : 'Foo', age : 23};
+      dynamodb.putItem.withArgs(request).yields(null, {});
+
+      serializer.serializeItem.withArgs(schema, item).returns(request.Item);
+
+      table.create({email : 'test@test.com', age: 23}, function (err, account) {
+        account.should.be.instanceof(Item);
+
+        account.get('email').should.equal('test@test.com');
+        account.get('name').should.equal('Foo');
+
+        done();
+      });
+    });
+
   });
 
   describe('#update', function () {
@@ -115,7 +147,7 @@ describe('table', function () {
         email  : {S : 'test@test.com'},
         name   : {S : 'Tim Test'},
         age    : {N : '25'},
-        scores : {NS : ['97', '86']},
+        scores : {NS : ['97', '86']}
       };
 
       var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
