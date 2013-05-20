@@ -311,5 +311,16 @@ describe('Serializer', function () {
       item.should.eql({ name: {Action: 'PUT', Value: {S: 'Tim Tester'} }});
     });
 
+    it('should not serialize hashkey and rangeKey attributes', function () {
+      schema.String('email', {hashKey: true});
+      schema.String('range', {rangeKey: true});
+      schema.String('name');
+
+      var item = serializer.serializeItemForUpdate(schema, 'PUT', {email: 'test@test.com', range: 'FOO', name: 'Tim Tester'});
+
+      item.should.eql({ name: {Action: 'PUT', Value: {S: 'Tim Tester'} }});
+    });
+
+
   });
 });
