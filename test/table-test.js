@@ -53,6 +53,112 @@ describe('table', function () {
         done();
       });
     });
+
+    it('should get item by hash and range key', function (done) {
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+      schema.Number('age');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        Key : {
+          name  : {S : 'Tim Tester'},
+          email : {S : 'test@test.com'}
+        }
+      };
+
+      var resp = {
+        Item : {email: {S : 'test@test.com'}, name: {S: 'Tim Tester'}}
+      };
+
+      dynamodb.getItem.withArgs(request).yields(null, resp);
+
+      serializer.buildKey.returns({email: resp.Item.email, name : resp.Item.name});
+
+      serializer.deserializeItem.withArgs(schema, resp.Item).returns({email : 'test@test.com', name : 'Tim Tester'});
+
+      table.get('Tim Tester', 'test@test.com', function (err, account) {
+        account.should.be.instanceof(Item);
+        serializer.buildKey.calledWith('Tim Tester', 'test@test.com', schema).should.be.true;
+
+        account.get('email').should.equal('test@test.com');
+        account.get('name').should.equal('Tim Tester');
+
+        done();
+      });
+    });
+
+    it('should get item by hash key and options', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        Key : {
+          email : {S : 'test@test.com'}
+        },
+        ConsistentRead: true
+      };
+
+      var resp = {
+        Item : {email: {S : 'test@test.com'}, name: {S: 'test dude'}}
+      };
+
+      dynamodb.getItem.withArgs(request).yields(null, resp);
+
+      serializer.buildKey.returns({email: resp.Item.email});
+
+      serializer.deserializeItem.withArgs(schema, resp.Item).returns({email : 'test@test.com', name : 'test dude'});
+
+      table.get('test@test.com', {ConsistentRead: true}, function (err, account) {
+        account.should.be.instanceof(Item);
+        account.get('email').should.equal('test@test.com');
+        account.get('name').should.equal('test dude');
+
+        done();
+      });
+    });
+
+    it('should get item by hashkey, range key and options', function (done) {
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+      schema.Number('age');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        Key : {
+          name  : {S : 'Tim Tester'},
+          email : {S : 'test@test.com'}
+        },
+        ConsistentRead: true
+      };
+
+      var resp = {
+        Item : {email: {S : 'test@test.com'}, name: {S: 'Tim Tester'}}
+      };
+
+      dynamodb.getItem.withArgs(request).yields(null, resp);
+
+      serializer.buildKey.returns({email: resp.Item.email, name : resp.Item.name});
+
+      serializer.deserializeItem.withArgs(schema, resp.Item).returns({email : 'test@test.com', name : 'Tim Tester'});
+
+      table.get('Tim Tester', 'test@test.com', {ConsistentRead: true}, function (err, account) {
+        account.should.be.instanceof(Item);
+        serializer.buildKey.calledWith('Tim Tester', 'test@test.com', schema).should.be.true;
+
+        account.get('email').should.equal('test@test.com');
+        account.get('name').should.equal('Tim Tester');
+
+        done();
+      });
+    });
   });
 
   describe('#create', function () {
