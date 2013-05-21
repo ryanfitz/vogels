@@ -447,6 +447,43 @@ describe('table', function () {
       });
     });
 
+    it('should accept hash and range key', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name', {rangeKey: true});
+      schema.Number('age');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        Key : {
+          email : {S : 'test@test.com'},
+          name : {S : 'Foo Bar'}
+        }
+      };
+
+      var returnedAttributes = {
+        email : {S : 'test@test.com'},
+        name  : {S : 'Foo Bar'}
+      };
+
+      dynamodb.deleteItem.yields(null, {Attributes: returnedAttributes});
+
+      serializer.buildKey.returns(request.Key);
+      serializer.deserializeItem.withArgs(schema, returnedAttributes).returns(
+        {email : 'test@test.com', name: 'Foo Bar'
+      });
+
+      table.destroy('test@test.com', 'Foo Bar', function (err, item) {
+        serializer.buildKey.calledWith('test@test.com', 'Foo Bar', schema).should.be.true;
+        dynamodb.deleteItem.calledWith(request).should.be.true;
+
+        item.get('name').should.equal('Foo Bar');
+
+        done();
+      });
+    });
+
     it('should accept hashkey rangekey and options', function (done) {
       schema.String('email', {hashKey: true});
       schema.String('name', {rangeKey: true});
