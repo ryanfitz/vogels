@@ -71,6 +71,29 @@ describe('Serializer', function () {
     });
 
   });
+  describe('#deserializeKeys', function () {
+
+    it('should handle string hash key', function () {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+
+      var keys = serializer.deserializeKeys(schema, {email : {S : 'test@example.com'}, name : {S: 'Foo Bar'}});
+
+      keys.should.eql({email: 'test@example.com'});
+    });
+
+    it('should handle range key', function () {
+      schema.String('email', {hashKey: true});
+      schema.Number('age', {rangeKey: true});
+      schema.String('name');
+
+      var serializedItem = {email : {S : 'test@example.com'}, age : {N : '22'}, name : {S: 'Foo Bar'}};
+      var keys = serializer.deserializeKeys(schema, serializedItem);
+
+      keys.should.eql({email: 'test@example.com', age: 22});
+    });
+
+  });
 
   describe('#serializeItem', function () {
     it('should serialize string attribute', function () {

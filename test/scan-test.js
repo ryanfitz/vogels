@@ -24,11 +24,13 @@ describe('Scan', function () {
       schema.String('name', {hashKey: true});
       schema.String('email', {rangeKey: true});
 
-      table.runScan.yields(null, {});
+      table.runScan.yields(null, {ConsumedCapacity: {CapacityUnits : 5, TableName: 'accounts'}, Count: 10, ScannedCount: 12});
       serializer.serializeItem.returns({name: {S: 'tim'}});
 
       new Scan(table, serializer).exec(function (err, results) {
-        console.log(err, results);
+        results.ConsumedCapacity.should.eql({CapacityUnits: 5, TableName: 'accounts'});
+        results.Count.should.equal(10);
+        results.ScannedCount.should.equal(12);
 
         done();
       });
@@ -295,4 +297,18 @@ describe('Scan', function () {
     });
 
   });
+
+  describe('#loadAll', function () {
+
+    it('should set load all option to true', function () {
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+
+      var scan = new Scan(table, serializer).limit(10);
+
+      scan.options.loadAll = true;
+    });
+  });
+
+
 });
