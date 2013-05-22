@@ -97,7 +97,7 @@ describe('Serializer', function () {
 
       serializer.serializeItem(schema, {agree: false}).should.eql({agree: {N: '0'}});
       serializer.serializeItem(schema, {agree: 'false'}).should.eql({agree: {N: '0'}});
-      serializer.serializeItem(schema, {agree: null}).should.eql({agree: {N: '0'}});
+      //serializer.serializeItem(schema, {agree: null}).should.eql({agree: {N: '0'}});
       serializer.serializeItem(schema, {agree: 0}).should.eql({agree: {N: '0'}});
     });
 
@@ -299,6 +299,18 @@ describe('Serializer', function () {
         name   : {Action : 'PUT', Value : {S  : 'Tim Test'}},
         age    : {Action : 'PUT', Value : {N  : '25'} },
         scores : {Action : 'PUT', Value : {NS : ['94', '92', '100']} }
+      });
+    });
+
+    it('should serialize null value to a DELETE action', function () {
+      schema.String('name');
+      schema.Number('age');
+
+      var item = serializer.serializeItemForUpdate(schema, 'PUT', {age: null, name : 'Foo Bar'});
+
+      item.should.eql({
+        name: {Action: 'PUT', Value: {S: 'Foo Bar'} },
+        age:  {Action: 'DELETE'}
       });
     });
 
