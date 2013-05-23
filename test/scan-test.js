@@ -126,7 +126,7 @@ describe('Scan', function () {
 
       var scan = new Scan(table, serializer).select('COUNT');
 
-      scan.request.Count.should.eql('COUNT');
+      scan.request.Select.should.eql('COUNT');
     });
   });
 

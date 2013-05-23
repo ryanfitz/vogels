@@ -154,7 +154,7 @@ describe('Query', function () {
 
       var query = new Query('tim', table, serializer).select('COUNT');
 
-      query.request.Count.should.eql('COUNT');
+      query.request.Select.should.eql('COUNT');
     });
   });
 
