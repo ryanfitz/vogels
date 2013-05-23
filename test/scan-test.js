@@ -36,6 +36,23 @@ describe('Scan', function () {
       });
     });
 
+    it('should return LastEvaluatedKey', function (done) {
+      schema.String('name', {hashKey: true});
+      schema.String('email');
+
+      table.runScan.yields(null, {LastEvaluatedKey: {name : 'tim'}, Count: 10, ScannedCount: 12});
+      serializer.serializeItem.returns({name: {S: 'tim'}});
+
+      new Scan(table, serializer).exec(function (err, results) {
+        results.Count.should.equal(10);
+        results.ScannedCount.should.equal(12);
+
+        results.LastEvaluatedKey.should.eql({name : 'tim'});
+
+        done();
+      });
+    });
+
   });
 
   describe('#limit', function () {
