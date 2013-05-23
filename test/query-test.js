@@ -257,4 +257,18 @@ describe('Query', function () {
     });
 
   });
+
+
+  describe('#loadAll', function () {
+
+    it('should set load all option to true', function () {
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+
+      var query = new Query('tim', table, serializer).loadAll();
+
+      query.options.loadAll = true;
+    });
+  });
+
 });
