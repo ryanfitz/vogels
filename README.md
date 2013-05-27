@@ -7,8 +7,8 @@ vogels is a [DynamoDB][5] datamapper for [node.js][1].
 * Advanced chainable apis for [query](#query) and [scan](#scan) operations
 * Data validation
 * Autogenerating UUIDs
-* [Secondary Indexes][3]
-* [Parallel Scans][4]
+* [Secondary Indexes](#secondary-indexes)
+* [Parallel Scans](#parallel-scan)
 
 ## Installation
 
