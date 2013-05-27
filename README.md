@@ -203,7 +203,7 @@ Account.get('test@example.com', {ConsistentRead: true}, function (err, acc) {
 });
 ```
 
-Model.get accepts any options that DynamoDB getItem request supports. For
+`Model.get` accepts any options that DynamoDB getItem request supports. For
 example:
 
 ```js
@@ -571,7 +571,7 @@ BlogPost.getItems([postKey1, postKey2], function (err, posts) {
 });
 ```
 
-`Model.getItems` acceptions options which will be passed to DynamoDB when making the batchGetItem request
+`Model.getItems` accepts options which will be passed to DynamoDB when making the batchGetItem request
 
 ```js
 // Get both accounts, using a consistent read
