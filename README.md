@@ -632,6 +632,15 @@ Account.create({email: 'test@example.com', name : 'Test Account'}, function (err
 
 See the [examples][0] for more working sample code.
 
+## TODO
+
+* Atomic increment and decrement attribute updates
+* Batch Write Items
+* Streaming api support for all operations
+* DDL operations (create table, delete table, update throughput)
+* Exporting and restoring of data
+* Full intergration test suite (If anyone from AWS is reading this, a test account would be fantastic :) )
+
 ### License
 
 (The MIT License)
