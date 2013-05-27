@@ -1,9 +1,14 @@
-vogels
-======================
+# vogels [![Build Status](https://travis-ci.org/ryanfitz/vogels.png?branch=master)](https://travis-ci.org/ryanfitz/vogels)
 
-[![Build Status](https://travis-ci.org/ryanfitz/vogels.png?branch=master)](https://travis-ci.org/ryanfitz/vogels)
+vogels is a [DynamoDB][5] datamapper for [node.js][1].
 
-vogels is a DynamoDB datamapper for [node.js][1].
+## Features
+* Simplified data modeling and mapping to DynamoDB types
+* Advanced chainable apis for [query](#query) and [scan](#scan) operations
+* Data validation
+* Autogenerating UUIDs
+* [Secondary Indexes][3]
+* [Parallel Scans][4]
 
 ## Installation
 
@@ -655,3 +660,4 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 [2]: http://aws.amazon.com/sdkfornodejs
 [3]: http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/LSI.html
 [4]: http://aws.typepad.com/aws/2013/05/amazon-dynamodb-parallel-scans-and-other-good-news.html
+[5]: http://aws.amazon.com/dynamodb
