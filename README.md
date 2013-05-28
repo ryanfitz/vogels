@@ -99,7 +99,7 @@ vogels.dynamoDriver(dynamodb);
 With your models defined, we can start saving them to DynamoDB.
 
 ```js
-Account.create({email: 'foo@example.com', name : 'Foo Bar', age: 21}, function (err, acc) {
+Account.create({email: 'foo@example.com', name: 'Foo Bar', age: 21}, function (err, acc) {
   console.log('created account in DynamoDB', acc.get('email'));
 });
 ```
@@ -107,7 +107,7 @@ Account.create({email: 'foo@example.com', name : 'Foo Bar', age: 21}, function (
 You can also first instantiate a model and then save it.
 
 ```js
-var acc = new Account({email: 'test@example.com', name : 'Test Example'});
+var acc = new Account({email: 'test@example.com', name: 'Test Example'});
 acc.save(function (err) {
   console.log('created account in DynamoDB', acc.get('email'));
 });
@@ -118,7 +118,7 @@ hashkeys.
 
 ```js
 BlogPost.create({
-  email : 'werner@example.com', 
+  email: 'werner@example.com', 
   title: 'Expanding the Cloud', 
   content: 'Today, we are excited to announce the limited preview...'
   }, function (err, post) {
@@ -127,12 +127,13 @@ BlogPost.create({
 ```
 
 ### Updating
+
 When updating a model the hash and range key attributes must be given, all
 other attributes are optional
 
 ```js
 // update the name of the foo@example.com account
-Account.update({email: 'foo@example.com', name : 'Bar Tester'}, function (err, acc) {
+Account.update({email: 'foo@example.com', name: 'Bar Tester'}, function (err, acc) {
   console.log('update account', acc.get('name'));
 });
 ```
@@ -140,17 +141,17 @@ Account.update({email: 'foo@example.com', name : 'Bar Tester'}, function (err, a
 `Model.update` accepts options to pass to DynamoDB when making the updateItem request
 
 ```js
-Account.update({email: 'foo@example.com', name : 'Bar Tester'}, {ReturnValues: 'ALL_OLD'}, function (err, acc) {
+Account.update({email: 'foo@example.com', name: 'Bar Tester'}, {ReturnValues: 'ALL_OLD'}, function (err, acc) {
   console.log('update account', acc.get('name')); // prints the old account name
 });
 
 // Only update the account if the current age of the account is 21
-Account.update({email: 'foo@example.com', name : 'Bar Tester'}, {expected: {age: 22}}, function (err, acc) {
+Account.update({email: 'foo@example.com', name: 'Bar Tester'}, {expected: {age: 22}}, function (err, acc) {
   console.log('update account', acc.get('name'));
 });
 
 // setting an attribute to null will delete the attribute from DynamoDB
-Account.update({email: 'foo@example.com', age : null}, function (err, acc) {
+Account.update({email: 'foo@example.com', age: null}, function (err, acc) {
   console.log('update account', acc.get('age')); // prints null
 });
 ```
@@ -169,7 +170,7 @@ BlogPost.destroy('foo@example.com', 'Hello World!', function (err) {
   console.log('post deleted')
 });
 
-BlogPost.destroy({email : 'foo@example.com', title: 'Another Post'}, function (err) {
+BlogPost.destroy({email: 'foo@example.com', title: 'Another Post'}, function (err) {
   console.log('another post deleted')
 });
 ```
