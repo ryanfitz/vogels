@@ -341,7 +341,7 @@ BlogPost
   .query('werner@example.com')
   .where('title').between(['foo@example.com', 'test@example.com'])
   .exec();
-
+```
 
 #### Secondary Indexes
 First, define a model using secondard indexes
