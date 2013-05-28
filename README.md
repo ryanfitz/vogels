@@ -1,6 +1,6 @@
 # vogels [![Build Status](https://travis-ci.org/ryanfitz/vogels.png?branch=master)](https://travis-ci.org/ryanfitz/vogels)
 
-vogels is a [DynamoDB][5] datamapper for [node.js][1].
+vogels is a [DynamoDB][5] data mapper for [node.js][1].
 
 ## Features
 * Simplified data modeling and mapping to DynamoDB types
@@ -308,21 +308,25 @@ BlogPost
   .where('title').equals('Expanding')
   .exec();
 
+// less than equals
 BlogPost
   .query('werner@example.com')
   .where('title').lte('Expanding')
   .exec();
 
+// less than
 BlogPost
   .query('werner@example.com')
   .where('title').lt('Expanding')
   .exec();
 
+// greater than
 BlogPost
   .query('werner@example.com')
   .where('title').gt('Expanding')
   .exec();
 
+// greater than equals
 BlogPost
   .query('werner@example.com')
   .where('title').gte('Expanding')
@@ -337,7 +341,7 @@ BlogPost
   .query('werner@example.com')
   .where('title').between(['foo@example.com', 'test@example.com'])
   .exec();
-```
+
 
 #### Secondary Indexes
 First, define a model using secondard indexes
