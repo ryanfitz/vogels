@@ -685,7 +685,6 @@ See the [examples][0] for more working sample code.
 
 ## TODO
 
-* Atomic increment and decrement attribute updates
 * Batch Write Items
 * Streaming api support for all operations
 * DDL operations (create table, delete table, update throughput)
