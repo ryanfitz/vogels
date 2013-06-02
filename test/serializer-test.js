@@ -356,6 +356,33 @@ describe('Serializer', function () {
       item.should.eql({ name: {Action: 'PUT', Value: {S: 'Tim Tester'} }});
     });
 
+    it('should serialize add operations', function () {
+      schema.String('email', {hashKey: true});
+      schema.Number('age');
+      schema.StringSet('names');
+
+      var update = {email: 'test@test.com', age: {$add : 1}, names : {$add: ['foo', 'bar']}};
+      var item = serializer.serializeItemForUpdate(schema, 'PUT', update);
+
+      item.should.eql({
+        age  : {Action: 'ADD', Value: {N: '1'}},
+        names: {Action: 'ADD', Value: {SS: ['foo', 'bar']}}
+      });
+    });
+
+    it('should serialize delete operations', function () {
+      schema.String('email', {hashKey: true});
+      schema.StringSet('names');
+      schema.NumberSet('ages');
+
+      var update = {email: 'test@test.com', ages: {$del : [2, 3]}, names : {$del: ['foo', 'bar']}};
+      var item = serializer.serializeItemForUpdate(schema, 'PUT', update);
+
+      item.should.eql({
+        names: {Action: 'DELETE', Value: {SS: ['foo', 'bar']}},
+        ages : {Action: 'DELETE', Value: {NS: ['2', '3']}}
+      });
+    });
 
   });
 });

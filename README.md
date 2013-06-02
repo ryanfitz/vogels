@@ -48,6 +48,7 @@ var BlogPost = vogels.define('Account', function (schema) {
   schema.String('email', {hashKey: true});
   schema.String('title', {rangeKey: true});
   schema.String('content');
+  schema.StringSet('tags');
 });
 ```
 
@@ -153,6 +154,51 @@ Account.update({email: 'foo@example.com', name: 'Bar Tester'}, {expected: {age: 
 // setting an attribute to null will delete the attribute from DynamoDB
 Account.update({email: 'foo@example.com', age: null}, function (err, acc) {
   console.log('update account', acc.get('age')); // prints null
+});
+```
+
+You can also pass what action to perform when updating a given attribute
+Use $add to increment or decrement numbers and add values to sets
+
+```js
+Account.update({email : 'foo@example.com', age : {$add : 1}}, function (err, acc) {
+  console.log('incremented age by 1', acc.get('age'));
+});
+
+BlogPost.update({
+  email : 'werner@example.com',
+  title : 'Expanding the Cloud',
+  tags  : {$add : 'cloud'}
+}, function (err, post) {
+  console.log('added single tag to blog post', post.get('tags'));
+});
+
+BlogPost.update({
+  email : 'werner@example.com',
+  title : 'Expanding the Cloud',
+  tags  : {$add : ['cloud', 'dynamodb']}
+}, function (err, post) {
+  console.log('added tags to blog post', post.get('tags'));
+});
+```
+
+$del will remove values from a given set
+
+```js
+BlogPost.update({
+  email : 'werner@example.com',
+  title : 'Expanding the Cloud',
+  tags  : {$del : 'cloud'}
+}, function (err, post) {
+  console.log('removed cloud tag from blog post', post.get('tags'));
+});
+
+BlogPost.update({
+  email : 'werner@example.com',
+  title : 'Expanding the Cloud',
+  tags  : {$del : ['aws', 'node']}
+}, function (err, post) {
+  console.log('removed multiple tags', post.get('tags'));
 });
 ```
 
