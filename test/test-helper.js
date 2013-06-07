@@ -5,12 +5,13 @@ var sinon = require('sinon'),
 
 exports.mockDynamoDB = function () {
   var dynamodb = {
-    scan       : sinon.stub(),
-    putItem    : sinon.stub(),
-    deleteItem : sinon.stub(),
-    query      : sinon.stub(),
-    getItem    : sinon.stub(),
-    updateItem : sinon.stub()
+    scan        : sinon.stub(),
+    putItem     : sinon.stub(),
+    deleteItem  : sinon.stub(),
+    query       : sinon.stub(),
+    getItem     : sinon.stub(),
+    updateItem  : sinon.stub(),
+    createTable : sinon.stub()
   };
 
   return dynamodb;

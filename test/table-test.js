@@ -6,7 +6,11 @@ var helper = require('./test-helper'),
     Schema = require('../lib/schema'),
     Query  = require('../lib//query'),
     Scan   = require('../lib//scan'),
-    Item   = require('../lib/item');
+    Item   = require('../lib/item'),
+    chai   = require('chai'),
+    expect = chai.expect;
+
+chai.should();
 
 describe('table', function () {
   var schema,
@@ -553,4 +557,105 @@ describe('table', function () {
     });
   });
 
+  describe('#createTable', function () {
+    it('should create table with hash key', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        AttributeDefinitions : [
+          { AttributeName: 'email', AttributeType: 'S' }
+        ],
+        KeySchema: [
+          { AttributeName: 'email', KeyType: 'HASH' }
+        ],
+        ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+      };
+
+      dynamodb.createTable.yields(null, {});
+
+      table.createTable({readCapacity : 5, writeCapacity: 5}, function (err) {
+        expect(err).to.be.null;
+        dynamodb.createTable.calledWith(request).should.be.true;
+        done();
+      });
+
+    });
+
+    it('should create table with range key', function (done) {
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        AttributeDefinitions : [
+          { AttributeName: 'name', AttributeType: 'S' },
+          { AttributeName: 'email', AttributeType: 'S' }
+        ],
+        KeySchema: [
+          { AttributeName: 'name', KeyType: 'HASH' },
+          { AttributeName: 'email', KeyType: 'RANGE' }
+        ],
+        ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+      };
+
+      dynamodb.createTable.yields(null, {});
+
+      table.createTable({readCapacity : 5, writeCapacity: 5}, function (err) {
+        expect(err).to.be.null;
+        dynamodb.createTable.calledWith(request).should.be.true;
+        done();
+      });
+
+    });
+
+    it('should create table with secondary index', function (done) {
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+      schema.Number('age', {secondaryIndex: true});
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        AttributeDefinitions : [
+          { AttributeName: 'name', AttributeType: 'S' },
+          { AttributeName: 'email', AttributeType: 'S' },
+          { AttributeName: 'age', AttributeType: 'N' }
+        ],
+        KeySchema: [
+          { AttributeName: 'name', KeyType: 'HASH' },
+          { AttributeName: 'email', KeyType: 'RANGE' }
+        ],
+        LocalSecondaryIndexes : [
+          {
+            IndexName : 'ageIndex',
+            KeySchema: [
+              { AttributeName: 'name', KeyType: 'HASH' },
+              { AttributeName: 'age', KeyType: 'RANGE' }
+            ],
+            Projection : {
+              ProjectionType : 'ALL'
+            }
+          }
+        ],
+        ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+      };
+
+      dynamodb.createTable.yields(null, {});
+
+      table.createTable({readCapacity : 5, writeCapacity: 5}, function (err) {
+        expect(err).to.be.null;
+        dynamodb.createTable.calledWith(request).should.be.true;
+        done();
+      });
+    });
+
+  });
 });
+
