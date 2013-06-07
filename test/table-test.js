@@ -657,5 +657,29 @@ describe('table', function () {
     });
 
   });
+
+  describe('#describeTable', function () {
+
+    it('should make describe table request', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts'
+      };
+
+      dynamodb.describeTable.yields(null, {});
+
+      table.describeTable(function (err) {
+        expect(err).to.be.null;
+        dynamodb.describeTable.calledWith(request).should.be.true;
+        done();
+      });
+    });
+
+  });
+
 });
 

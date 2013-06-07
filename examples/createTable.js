@@ -13,5 +13,14 @@ var Account = vogels.define('Account', function (schema) {
 });
 
 Account.createTable(function (err, result) {
-  console.log(err, result);
+  if(err) {
+    console.log('error create table', err);
+  } else  {
+
+    console.log(err, result);
+
+    Account.describeTable(function (err, result) {
+      console.log('table info', result);
+    });
+  }
 });

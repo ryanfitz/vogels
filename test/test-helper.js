@@ -11,7 +11,8 @@ exports.mockDynamoDB = function () {
     query       : sinon.stub(),
     getItem     : sinon.stub(),
     updateItem  : sinon.stub(),
-    createTable : sinon.stub()
+    createTable : sinon.stub(),
+    describeTable : sinon.stub()
   };
 
   return dynamodb;
