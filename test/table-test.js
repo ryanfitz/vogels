@@ -680,6 +680,28 @@ describe('table', function () {
     });
 
   });
+  describe('#updateTable', function () {
+
+    it('should make update table request', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        ProvisionedThroughput: { ReadCapacityUnits: 4, WriteCapacityUnits: 2 }
+      };
+
+      dynamodb.updateTable.yields(null, {});
+
+      table.updateTable({readCapacity: 4, writeCapacity: 2}, function (err) {
+        expect(err).to.be.null;
+        dynamodb.updateTable.calledWith(request).should.be.true;
+        done();
+      });
+    });
+  });
 
 });
 
