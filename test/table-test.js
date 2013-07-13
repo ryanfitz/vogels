@@ -300,7 +300,7 @@ describe('table', function () {
         },
         ReturnValues: 'ALL_OLD',
         Expected : {
-          name : {S : 'Foo Bar'}
+          name : {'Value' : {S : 'Foo Bar'}}
         }
       };
 
@@ -320,7 +320,7 @@ describe('table', function () {
       serializer.deserializeItem.withArgs(schema, returnedAttributes).returns(returnedItem);
       dynamodb.updateItem.withArgs(request).yields(null, {Attributes: returnedAttributes});
 
-      serializer.serializeItem.withArgs(schema, {name: 'Foo Bar'}).returns(request.Expected);
+      serializer.serializeItem.withArgs(schema, {name: 'Foo Bar'}, {expected: true}).returns(request.Expected);
 
       table.update(item, {ReturnValues: 'ALL_OLD', expected: {name: 'Foo Bar'}}, function (err, account) {
         account.should.be.instanceof(Item);
@@ -539,13 +539,13 @@ describe('table', function () {
           email : {S : 'test@test.com'}
         },
         Expected : {
-          name : {S : 'Foo Bar'}
+          name : {'Valeu' : {S : 'Foo Bar'}}
         }
       };
 
       dynamodb.deleteItem.yields(null, {});
 
-      serializer.serializeItem.withArgs(schema, {name: 'Foo Bar'}).returns(request.Expected);
+      serializer.serializeItem.withArgs(schema, {name: 'Foo Bar'}, {expected : true}).returns(request.Expected);
       serializer.buildKey.returns(request.Key);
 
       table.destroy('test@test.com', {expected: {name : 'Foo Bar'}}, function () {
