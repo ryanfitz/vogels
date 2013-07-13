@@ -539,7 +539,7 @@ describe('table', function () {
           email : {S : 'test@test.com'}
         },
         Expected : {
-          name : {'Valeu' : {S : 'Foo Bar'}}
+          name : {'Value' : {S : 'Foo Bar'}}
         }
       };
 
