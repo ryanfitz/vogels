@@ -208,6 +208,14 @@ describe('Serializer', function () {
       item.should.eql({name: { 'Value' : {S: 'Tim Tester'}}});
     });
 
+    it('should serialize string attribute for expected exists false', function () {
+      schema.String('name');
+
+      var item = serializer.serializeItem(schema, {name: {Exists: false}}, {expected : true});
+
+      item.should.eql({name: { 'Exists' : false}});
+    });
+
   });
 
   describe('#deserializeItem', function () {
