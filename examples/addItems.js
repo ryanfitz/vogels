@@ -14,4 +14,4 @@ var Account = vogels.define('Account', function (schema) {
 
 for (var i = 0; i < 50 ; i++) {
   Account.create({name : 'Account ' + i, email : 'account' +i + '@gmail.com', age : i});
-};
+}
