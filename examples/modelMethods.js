@@ -1,7 +1,7 @@
 'use strict';
 
 var vogels = require('../index'),
-AWS    = vogels.AWS;
+    AWS    = vogels.AWS;
 
 AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
 
