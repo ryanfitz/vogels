@@ -395,7 +395,7 @@ BlogPost
 First, define a model with a global secondary index.
 
 ```js
-var BlogPost = vogels.define('GameScore', function (schema) {
+var GameScore = vogels.define('GameScore', function (schema) {
   schema.String('userId', {hashKey: true});
   schema.String('gameTitle', {rangeKey: true});
   schema.Number('topScore');
@@ -410,7 +410,7 @@ var BlogPost = vogels.define('GameScore', function (schema) {
 Now we can query against the global index 
 
 ```js
-BlogPost
+GameScore
   .query('Galaxy Invaders')
   .usingIndex('GameTitleIndex')
   .descending()
@@ -441,7 +441,7 @@ var GameScore = vogels.define('GameScore', function (schema) {
 Filter items against the configured rangekey for the global index.
 
 ```js
-`GameScore
+GameScore
   .query('Galaxy Invaders')
   .usingIndex('GameTitleIndex')
   .where('topScore').gt(1000)
