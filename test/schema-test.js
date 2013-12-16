@@ -230,4 +230,18 @@ describe('schema', function () {
       expect(d.age).to.not.exist;
     });
   });
+
+  describe('#globalIndex', function () {
+
+    it('should set globalIndexes', function () {
+      schema.String('userId', {hashKey: true});
+      schema.String('gameTitle', {rangeKey: true});
+      schema.Number('topScore');
+
+      schema.globalIndex('GameTitleIndex', {hashKey: 'gameTitle', rangeKey : 'topScore'});
+
+      schema.globalIndexes.should.include.keys('GameTitleIndex');
+    });
+
+  });
 });

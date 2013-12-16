@@ -28,8 +28,7 @@ describe('Query', function () {
       serializer.serializeItem.returns({name: {S: 'tim'}});
 
       new Query('tim', table, serializer).exec(function (err, results) {
-        console.log(err, results);
-
+        results.should.eql({Items: [], Count: 0});
         done();
       });
     });
@@ -61,6 +60,21 @@ describe('Query', function () {
       query.request.IndexName.should.equal('created');
     });
 
+    it('should create key condition for global index hash key', function () {
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+      schema.Number('age');
+
+      schema.globalIndex('UserAgeIndex', {hashKey: 'age'});
+
+      serializer.serializeItem.returns({age: {N: '18'}});
+
+      var query = new Query(18, table, serializer).usingIndex('UserAgeIndex');
+      query.buildRequest();
+
+      query.request.IndexName.should.equal('UserAgeIndex');
+      query.request.KeyConditions.age.should.eql({AttributeValueList: [{N: '18'}], ComparisonOperator: 'EQ'});
+    });
   });
 
   describe('#consistentRead', function () {

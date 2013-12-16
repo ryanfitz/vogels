@@ -7,7 +7,8 @@ vogels is a [DynamoDB][5] data mapper for [node.js][1].
 * Advanced chainable apis for [query](#query) and [scan](#scan) operations
 * Data validation
 * [Autogenerating UUIDs](#uuid)
-* [Secondary Indexes](#secondary-indexes)
+* [Global Secondary Indexes](#global-indexes)
+* [Local Secondary Indexes](#local-secondary-indexes)
 * [Parallel Scans](#parallel-scan)
 
 ## Installation
@@ -390,8 +391,68 @@ BlogPost
   .exec();
 ```
 
-#### Secondary Indexes
+#### Global Indexes
 First, define a model using secondard indexes
+
+```js
+var BlogPost = vogels.define('GameScore', function (schema) {
+  schema.String('userId', {hashKey: true});
+  schema.String('gameTitle', {rangeKey: true});
+  schema.Number('topScore');
+  schema.Date('topScoreDateTime');
+  schema.Number('wins');
+  schema.Number('losses');
+
+  schema.globalIndex('GameTitleIndex', { hashKey: 'gameTitle', rangeKey: 'topScore'});
+});
+```
+
+Now we can query against the global index 
+
+```js
+BlogPost
+  .query('Galaxy Invaders')
+  .usingIndex('GameTitleIndex')
+  .descending()
+  .exec(callback);
+```
+
+When can also configure the attributes projected into the index.
+By default all attributes will be projected when no Projection pramater is
+present 
+
+```js
+var GameScore = vogels.define('GameScore', function (schema) {
+  schema.String('userId', {hashKey: true});
+  schema.String('gameTitle', {rangeKey: true});
+  schema.Number('topScore');
+  schema.Date('topScoreDateTime');
+  schema.Number('wins');
+  schema.Number('losses');
+
+  schema.globalIndex('GameTitleIndex', {
+    hashKey: 'gameTitle',
+    rangeKey: 'topScore',
+    Projection: { NonKeyAttributes: [ 'wins' ], ProjectionType: 'INCLUDE' } //optional, defaults to ALL
+  });
+});
+```
+
+Filter items against the configured rangekey for the global index.
+
+```js
+`GameScore
+  .query('Galaxy Invaders')
+  .usingIndex('GameTitleIndex')
+  .where('topScore').gt(1000)
+  .descending()
+  .exec(function (err, data) {
+    console.log(_.map(data.Items, JSON.stringify));
+  });
+```
+
+#### Local Secondary Indexes
+First, define a model using a local secondary index
 
 ```js
 var BlogPost = vogels.define('Account', function (schema) {

@@ -656,6 +656,102 @@ describe('table', function () {
       });
     });
 
+    it('should create table with global secondary index', function (done) {
+      schema.String('userId', {hashKey: true});
+      schema.String('gameTitle', {rangeKey: true});
+      schema.Number('topScore');
+
+      schema.globalIndex('GameTitleIndex', {hashKey: 'gameTitle', rangeKey : 'topScore'});
+
+      table = new Table('gameScores', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'gameScores',
+        AttributeDefinitions : [
+          { AttributeName: 'userId', AttributeType: 'S' },
+          { AttributeName: 'gameTitle', AttributeType: 'S' },
+          { AttributeName: 'topScore', AttributeType: 'N' }
+        ],
+        KeySchema: [
+          { AttributeName: 'userId', KeyType: 'HASH' },
+          { AttributeName: 'gameTitle', KeyType: 'RANGE' }
+        ],
+        GlobalSecondaryIndexes : [
+          {
+            IndexName : 'GameTitleIndex',
+            KeySchema: [
+              { AttributeName: 'gameTitle', KeyType: 'HASH' },
+              { AttributeName: 'topScore', KeyType: 'RANGE' }
+            ],
+            Projection : {
+              ProjectionType : 'ALL'
+            },
+            ProvisionedThroughput: { ReadCapacityUnits: 1, WriteCapacityUnits: 1 }
+          }
+        ],
+        ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+      };
+
+      dynamodb.createTable.yields(null, {});
+
+      table.createTable({readCapacity : 5, writeCapacity: 5}, function (err) {
+        expect(err).to.be.null;
+        dynamodb.createTable.calledWith(request).should.be.true;
+        done();
+      });
+    });
+
+    it('should create table with global secondary index', function (done) {
+      schema.String('userId', {hashKey: true});
+      schema.String('gameTitle', {rangeKey: true});
+      schema.Number('topScore');
+
+      schema.globalIndex('GameTitleIndex', {
+        hashKey: 'gameTitle',
+        rangeKey : 'topScore',
+        readCapacity: 10,
+        writeCapacity: 5,
+        Projection: { NonKeyAttributes: [ 'wins' ], ProjectionType: 'INCLUDE' }
+      });
+
+      table = new Table('gameScores', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'gameScores',
+        AttributeDefinitions : [
+          { AttributeName: 'userId', AttributeType: 'S' },
+          { AttributeName: 'gameTitle', AttributeType: 'S' },
+          { AttributeName: 'topScore', AttributeType: 'N' }
+        ],
+        KeySchema: [
+          { AttributeName: 'userId', KeyType: 'HASH' },
+          { AttributeName: 'gameTitle', KeyType: 'RANGE' }
+        ],
+        GlobalSecondaryIndexes : [
+          {
+            IndexName : 'GameTitleIndex',
+            KeySchema: [
+              { AttributeName: 'gameTitle', KeyType: 'HASH' },
+              { AttributeName: 'topScore', KeyType: 'RANGE' }
+            ],
+            Projection: {
+              NonKeyAttributes: [ 'wins' ],
+              ProjectionType: 'INCLUDE'
+            },
+            ProvisionedThroughput: { ReadCapacityUnits: 10, WriteCapacityUnits: 5 }
+          }
+        ],
+        ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+      };
+
+      dynamodb.createTable.yields(null, {});
+
+      table.createTable({readCapacity : 5, writeCapacity: 5}, function (err) {
+        expect(err).to.be.null;
+        dynamodb.createTable.calledWith(request).should.be.true;
+        done();
+      });
+    });
   });
 
   describe('#describeTable', function () {
