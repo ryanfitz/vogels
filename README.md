@@ -392,7 +392,7 @@ BlogPost
 ```
 
 #### Global Indexes
-First, define a model using secondard indexes
+First, define a model with a global secondary index.
 
 ```js
 var BlogPost = vogels.define('GameScore', function (schema) {
