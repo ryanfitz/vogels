@@ -286,6 +286,8 @@ describe('table', function () {
       schema.String('name');
       schema.Number('age');
 
+      schema.globalIndex('AgeIndex', { hashKey: 'age', rangeKey: 'name'});
+
       table = new Table('accounts', schema, serializer, dynamodb);
 
       var request = {
@@ -313,7 +315,7 @@ describe('table', function () {
 
       var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
 
-      serializer.buildKey.returns(request.Key);
+      serializer.buildKey.withArgs('test@test.com', null, schema).returns(request.Key);
       serializer.serializeItemForUpdate.withArgs(schema, 'PUT', item).returns(request.AttributeUpdates);
 
       var returnedItem = _.merge({}, item, {scores: [97, 86]});
