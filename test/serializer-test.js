@@ -70,6 +70,17 @@ describe('Serializer', function () {
       keys.should.eql({year: {N: '1988'}, name: {S: 'Joe'}});
     });
 
+    it('should handle local secondary index keys', function () {
+      schema.String('email', {hashKey: true});
+      schema.Number('age', {rangeKey: true});
+      schema.String('name', { secondaryIndex: true });
+
+      var data = { email : 'test@example.com', age: 22, name: 'Foo Bar' };
+      var keys = serializer.buildKey(data, null, schema);
+
+      keys.should.eql({email: {S: 'test@example.com'}, age: {N : '22'}, name: {S: 'Foo Bar'}});
+    });
+
     it('should handle global secondary index keys', function () {
       schema.String('email', {hashKey: true});
       schema.Number('age');
@@ -85,6 +96,7 @@ describe('Serializer', function () {
 
       keys.should.eql({email: {S: 'test@example.com'}, age: {N : '22'}, name: {S: 'Foo Bar'}});
     });
+
   });
 
   describe('#deserializeKeys', function () {
@@ -109,7 +121,18 @@ describe('Serializer', function () {
       keys.should.eql({email: 'test@example.com', age: 22});
     });
 
-    it('should global secondary index keys', function () {
+    it('should deserialize local secondary index keys', function () {
+      schema.String('email', {hashKey: true});
+      schema.Number('age', {rangeKey: true});
+      schema.String('name', { secondaryIndex: true });
+
+      var serializedItem = {email : {S : 'test@example.com'}, age : {N : '22'}, name : {S: 'Foo Bar'}};
+      var keys = serializer.deserializeKeys(schema, serializedItem);
+
+      keys.should.eql({email: 'test@example.com', age: 22, name: 'Foo Bar'});
+    });
+
+    it('should deserialize global secondary index keys', function () {
       schema.String('email', {hashKey: true});
       schema.Number('age');
       schema.String('name');
