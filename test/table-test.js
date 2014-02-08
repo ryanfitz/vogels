@@ -801,5 +801,177 @@ describe('table', function () {
     });
   });
 
+  describe('hooks', function () {
+
+    describe('#create', function () {
+
+      it('should call before hook', function (done) {
+        schema.String('email', {hashKey: true});
+        schema.String('name');
+        schema.Number('age');
+
+        table = new Table('accounts', schema, serializer, dynamodb);
+
+        var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
+        dynamodb.putItem.yields(null, {});
+
+        serializer.serializeItem.withArgs(schema, {email : 'test@test.com', name : 'Tommy', age : 23}).returns({});
+
+        table.before('create', function (data, next) {
+          expect(data).to.exist;
+          data.name = 'Tommy';
+
+          return next(null, data);
+        });
+
+        table.create(item, function (err, item) {
+          expect(err).to.not.exist;
+          item.get('name').should.equal('Tommy');
+
+          return done();
+        });
+      });
+
+      it('should return error when before hook returns error', function (done) {
+        schema.String('email', {hashKey: true});
+        schema.String('name');
+        schema.Number('age');
+
+        table = new Table('accounts', schema, serializer, dynamodb);
+
+        table.before('create', function (data, next) {
+          return next(new Error('fail'));
+        });
+
+        table.create({email : 'foo@bar.com'}, function (err, item) {
+          expect(err).to.exist;
+          expect(item).to.not.exist;
+
+          return done();
+        });
+      });
+
+      it('should call after hook', function (done) {
+        schema.String('email', {hashKey: true});
+        schema.String('name');
+        schema.Number('age');
+
+        table = new Table('accounts', schema, serializer, dynamodb);
+
+        var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
+        dynamodb.putItem.yields(null, {});
+
+        serializer.serializeItem.withArgs(schema, item).returns({});
+
+        table.after('create', function (data) {
+          expect(data).to.exist;
+
+          return done();
+        });
+
+        table.create(item, function () {} );
+      });
+    });
+
+    describe('#update', function () {
+
+      it('should call before hook', function (done) {
+        schema.String('email', {hashKey: true});
+        schema.String('name');
+        schema.Number('age');
+
+        table = new Table('accounts', schema, serializer, dynamodb);
+
+        var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
+        dynamodb.updateItem.yields(null, {});
+
+        serializer.serializeItem.withArgs(schema, item).returns({});
+
+        serializer.buildKey.returns({email: {S: 'test@test.com' }});
+        var modified = {email : 'test@test.com', name : 'Tim Test', age : 44};
+        serializer.serializeItemForUpdate.withArgs(schema, 'PUT', modified).returns({});
+
+        serializer.deserializeItem.returns(modified);
+        dynamodb.updateItem.yields(null, {});
+
+        var called = false;
+        table.before('update', function (data, next) {
+          var attrs = _.merge({}, data, {age: 44});
+          called = true;
+          return next(null, attrs);
+        });
+
+        table.after('update', function () {
+          expect(called).to.be.true;
+          return done();
+        });
+
+        table.update(item, function () {} );
+      });
+
+      it('should return error when before hook returns error', function (done) {
+        schema.String('email', {hashKey: true});
+        schema.String('name');
+        schema.Number('age');
+
+        table = new Table('accounts', schema, serializer, dynamodb);
+
+        table.before('update', function (data, next) {
+          return next(new Error('fail'));
+        });
+
+        table.update({}, function (err) {
+          expect(err).to.exist;
+          err.message.should.equal('fail');
+
+          return done();
+        });
+      });
+
+      it('should call after hook', function (done) {
+        schema.String('email', {hashKey: true});
+        schema.String('name');
+        schema.Number('age');
+
+        table = new Table('accounts', schema, serializer, dynamodb);
+
+        var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
+        dynamodb.updateItem.yields(null, {});
+
+        serializer.serializeItem.withArgs(schema, item).returns({});
+
+        serializer.buildKey.returns({email: {S: 'test@test.com' }});
+        serializer.serializeItemForUpdate.returns({});
+
+        serializer.deserializeItem.returns(item);
+        dynamodb.updateItem.yields(null, {});
+
+
+        table.after('update', function () {
+          return done();
+        });
+
+        table.update(item, function () {} );
+      });
+    });
+
+    it('#destroy should call after hook', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+      schema.Number('age');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      dynamodb.deleteItem.yields(null, {});
+      serializer.buildKey.returns({});
+
+
+      table.after('destroy', function () {
+        return done();
+      });
+
+      table.destroy('test@test.com', function () {} );
+    });
+  });
 });
 

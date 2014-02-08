@@ -17,11 +17,11 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "~2.0.0-rc3",
+    "aws-sdk": "~2.0.0-rc9",
     "lodash": "~2.4.1",
     "joi": "~0.3.5",
     "node-uuid": "~1.4.0",
-    "async": "~0.2.9",
+    "async": "~0.2.10",
     "readable-stream": "~1.1.9"
   },
   "devDependencies": {
