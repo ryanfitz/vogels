@@ -97,6 +97,23 @@ describe('Serializer', function () {
       keys.should.eql({email: {S: 'test@example.com'}, age: {N : '22'}, name: {S: 'Foo Bar'}});
     });
 
+    it('should handle boolean global secondary index key', function () {
+      schema.String('email', {hashKey: true});
+      schema.Number('age');
+      schema.String('name');
+      schema.Boolean('adult');
+
+      schema.globalIndex('GameTitleIndex', {
+        hashKey: 'adult',
+        rangeKey: 'email'
+      });
+
+      var data = { email : 'test@example.com', adult: false };
+      var keys = serializer.buildKey(data, null, schema);
+
+      keys.should.eql({email: {S: 'test@example.com'}, adult: {N : '0'}});
+    });
+
   });
 
   describe('#deserializeKeys', function () {
