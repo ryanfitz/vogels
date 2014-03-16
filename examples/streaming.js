@@ -6,11 +6,12 @@ var vogels = require('../index'),
 AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
 
 var Product = vogels.define('Product', function (schema) {
-  schema.String('id', {hashKey: true});
-  schema.Number('accountID');
-  schema.String('purchased');
-  schema.Date('ctime');
-  schema.Number('price');
+  schema.String('ProductId', {hashKey: true});
+  schema.String('host');
+  schema.String('url');
+  schema.String('title');
+
+  schema.Date('created');
 });
 
 var printStream = function (msg, stream) {
@@ -22,7 +23,7 @@ var printStream = function (msg, stream) {
   stream.on('readable', function () {
     count++;
     console.log('----------------------' + count + '--------------------------');
-    console.log('Scanned ' + stream.read().Count + ' accounts - ' + msg);
+    console.log('Scanned ' + stream.read().Count + ' products - ' + msg);
   });
 
   stream.on('end', function () {
@@ -40,7 +41,7 @@ printStream('Load All Accounts 100 at a time', s2);
 
 var totalSegments = 4;
 var s3 = Product.parallelScan(totalSegments)
-  .attributes('price')
+  .attributes('url')
   .exec();
 
-printStream('Parallel Load Purchased', s3);
+printStream('Parallel Loaded urls', s3);
