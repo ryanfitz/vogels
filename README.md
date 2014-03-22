@@ -749,8 +749,7 @@ See the [examples][0] for more working sample code.
 * Batch Write Items
 * Streaming api support for all operations
 * DDL operations (create table, delete table, update throughput)
-* Exporting and restoring of data
-* Full intergration test suite (If anyone from AWS is reading this, a test account would be fantastic :) )
+* Full intergration test suite
 
 ### License
 
