@@ -166,8 +166,10 @@ describe('schema', function () {
       schema.String('email', {hashKey: true});
       schema.String('name', {default: 'Foo Bar'});
       schema.Number('age', {default: 3});
+      schema.Number('posts', {default: 0});
+      schema.Boolean('terms', {default: false});
 
-      schema.defaults().should.have.keys(['name', 'age']);
+      schema.defaults().should.have.keys(['name', 'age', 'posts', 'terms']);
     });
 
     it('should return empty object when no defaults exist', function () {

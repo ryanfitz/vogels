@@ -183,6 +183,15 @@ describe('Serializer', function () {
       item.should.eql({age: {N: '21'}});
     });
 
+    it('should serialize number attribute with value zero', function () {
+      schema.Number('age');
+
+      var item = serializer.serializeItem(schema, {age: 0});
+
+      item.should.eql({age: {N: '0'}});
+    });
+
+
     it('should serialize boolean attribute', function () {
       schema.Boolean('agree');
 
