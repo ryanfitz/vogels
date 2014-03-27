@@ -3,7 +3,9 @@
 var serializer = require('../lib/serializer'),
     chai = require('chai'),
     expect = chai.expect,
-    Schema = require('../lib/schema');
+    Schema = require('../lib/schema'),
+    zlib = require('zlib'),
+    async = require('async');
 
 chai.should();
 
@@ -183,6 +185,14 @@ describe('Serializer', function () {
       item.should.eql({age: {N: '21'}});
     });
 
+    it('should serialize binary attribute', function () {
+      schema.Binary('data');
+
+      var item = serializer.serializeItem(schema, {data: 'hello'});
+
+      item.should.eql({data: {B: 'aGVsbG8='}});
+    });
+
     it('should serialize number attribute with value zero', function () {
       schema.Number('age');
 
@@ -243,6 +253,22 @@ describe('Serializer', function () {
       var item = serializer.serializeItem(schema, {scores: 2});
 
       item.should.eql({scores: {NS: ['2']}});
+    });
+
+    it('should serialize binary set attribute', function () {
+      schema.BinarySet('data');
+
+      var item = serializer.serializeItem(schema, {data: ['hello', 'world']});
+
+      item.should.eql({data: {BS: ['aGVsbG8=', 'd29ybGQ=']}});
+    });
+
+    it('should serialize single binary set attribute', function () {
+      schema.BinarySet('data');
+
+      var item = serializer.serializeItem(schema, {data: 'hello'});
+
+      item.should.eql({data: {BS: ['aGVsbG8=']}});
     });
 
     it('should serialize uuid attribute', function () {
@@ -319,6 +345,37 @@ describe('Serializer', function () {
       item.age.should.equal(18);
     });
 
+    it('should parse binary attribute', function () {
+      schema.Binary('data');
+
+      var itemResp = {data : {B: 'aGVsbG8='} };
+
+      var item = serializer.deserializeItem(schema, itemResp);
+
+      item.data.toString().should.equal('hello');
+    });
+
+    it('should parse compressed binary data', function (done) {
+      schema.Binary('data');
+
+      var itemResp = {data : {B: 'eJzT0yMAAGTvBe8='} };
+
+      var item = serializer.deserializeItem(schema, itemResp);
+
+      zlib.unzip(item.data, function(err, buffer) {
+        if (!err) {
+          try {
+            buffer.toString().should.equal('.................................');
+            done();
+          } catch(e) {
+            done(e);
+            return;
+          }
+        }
+      });
+
+    });
+
     it('should parse number attribute', function () {
       schema.Date('created');
 
@@ -357,6 +414,26 @@ describe('Serializer', function () {
       var item = serializer.deserializeItem(schema, itemResp);
 
       item.nums.should.eql([18, 22, 23]);
+    });
+
+    it('should parse binary set attribute', function (done) {
+      schema.BinarySet('data');
+
+      var test = ['hello', 'world'];
+      var i = 0;
+
+      var itemResp = {data : {BS: ['aGVsbG8=', 'd29ybGQ=']} };
+
+      var item = serializer.deserializeItem(schema, itemResp);
+
+      async.forEachSeries(item.data, function(value, callback) {
+        try {
+          value.toString().should.equal(test[i++]);
+        } catch(err) {
+          return callback(err);
+        }
+        callback();
+      }, done);
     });
 
     it('should return null', function () {
