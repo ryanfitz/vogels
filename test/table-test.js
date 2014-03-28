@@ -777,6 +777,32 @@ describe('table', function () {
       });
     });
 
+    it('should work with a dynamic table name', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+
+      function dynamicTable() { }
+      dynamicTable.prototype.toString = function() {
+        return 'accounts';
+      }
+       
+      var tableName = new dynamicTable();
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: tableName
+      };
+
+      dynamodb.describeTable.yields(null, {});
+
+      table.describeTable(function (err) {
+        expect(err).to.be.null;
+        dynamodb.describeTable.calledWith({TableName: 'mycooltable'}).should.be.true;
+        done();
+      });
+
+    });
+
   });
   describe('#updateTable', function () {
 
