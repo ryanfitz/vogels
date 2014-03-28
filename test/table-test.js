@@ -797,7 +797,7 @@ describe('table', function () {
 
       table.describeTable(function (err) {
         expect(err).to.be.null;
-        dynamodb.describeTable.calledWith({TableName: 'mycooltable'}).should.be.true;
+        dynamodb.describeTable.calledWith({TableName: 'accounts'}).should.be.true;
         done();
       });
 
