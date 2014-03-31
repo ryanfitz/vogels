@@ -45,6 +45,20 @@ describe('vogels', function () {
       acc.table.should.be.instanceof(Table);
     });
 
+    it('should set table name', function() {
+      var d = new Date(),
+          Account = vogels.define('Account', function (schema) {
+        schema.String('email', {hashKey: true});
+        schema.String('name');
+        schema.Number('age');
+        schema.Date('created', {default: Date.now});
+
+        schema.tableName = function () {
+          return ['Accounts', d.getFullYear(), d.getMonth(), d.getDate()].join('_');
+        };
+      });
+      Account.config().name.should.equal(['Accounts', d.getFullYear(), d.getMonth(), d.getDate()].join('_'));
+    });
   });
 
   describe('#models', function () {
