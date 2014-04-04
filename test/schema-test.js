@@ -20,7 +20,7 @@ describe('schema', function () {
       schema.String('name');
 
       schema.attrs.should.have.keys(['name']);
-      schema.attrs.name.type.type.should.equal('String');
+      schema.attrs.name.type._type.should.equal('string');
     });
 
     it('should set hashkey', function () {
@@ -48,7 +48,7 @@ describe('schema', function () {
       schema.Number('age');
 
       schema.attrs.should.have.keys(['age']);
-      schema.attrs.age.type.type.should.equal('Number');
+      schema.attrs.age.type._type.should.equal('number');
     });
   });
 
@@ -57,7 +57,7 @@ describe('schema', function () {
       schema.Boolean('agree');
 
       schema.attrs.should.have.keys(['agree']);
-      schema.attrs.agree.type.type.should.equal('Boolean');
+      schema.attrs.agree.type._type.should.equal('boolean');
     });
   });
 
@@ -66,7 +66,7 @@ describe('schema', function () {
       schema.Date('created');
 
       schema.attrs.should.have.keys(['created']);
-      schema.attrs.created.type.type.should.equal('Date');
+      schema.attrs.created.type._type.should.equal('date');
     });
   });
 
@@ -75,7 +75,7 @@ describe('schema', function () {
       schema.StringSet('names');
 
       schema.attrs.should.have.keys(['names']);
-      schema.attrs.names.type.type.should.equal('StringSet');
+      schema.attrs.names.type._type.should.equal('stringset');
     });
   });
 
@@ -84,7 +84,7 @@ describe('schema', function () {
       schema.NumberSet('scores');
 
       schema.attrs.should.have.keys(['scores']);
-      schema.attrs.scores.type.type.should.equal('NumberSet');
+      schema.attrs.scores.type._type.should.equal('numberset');
     });
   });
 
@@ -94,7 +94,7 @@ describe('schema', function () {
 
       schema.attrs.should.have.keys(['id']);
       schema.attrs.id.options.default.should.exist;
-      schema.attrs.id.type.type.should.equal('UUID');
+      schema.attrs.id.type._type.should.equal('uuid');
     });
 
     it('should set as uuid with default as given value', function () {
@@ -102,7 +102,7 @@ describe('schema', function () {
 
       schema.attrs.should.have.keys(['id']);
       schema.attrs.id.options.default.should.equal('123');
-      schema.attrs.id.type.type.should.equal('UUID');
+      schema.attrs.id.type._type.should.equal('uuid');
     });
   });
 
@@ -112,7 +112,7 @@ describe('schema', function () {
 
       schema.attrs.should.have.keys(['timeid']);
       schema.attrs.timeid.options.default.should.exist;
-      schema.attrs.timeid.type.type.should.equal('TimeUUID');
+      schema.attrs.timeid.type._type.should.equal('timeuuid');
     });
 
     it('should set as uuid with default as given value', function () {
@@ -120,7 +120,7 @@ describe('schema', function () {
 
       schema.attrs.should.have.keys(['stamp']);
       schema.attrs.stamp.options.default.should.equal('123');
-      schema.attrs.stamp.type.type.should.equal('TimeUUID');
+      schema.attrs.stamp.type._type.should.equal('timeuuid');
     });
   });
 

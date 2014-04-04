@@ -28,5 +28,5 @@ fs.readFile(__dirname + '/basic.js', function (err, data) {
     throw err;
   }
 
-  File.create({name : 'basic.js', data: new Date}, printFileInfo);
+  File.create({name : 'basic.js', data: data}, printFileInfo);
 });
