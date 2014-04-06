@@ -17,21 +17,21 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "~2.0.0-rc9",
-    "lodash": "~2.4.1",
-    "joi": "~2.9.0",
-    "node-uuid": "~1.4.0",
-    "async": "~0.2.10",
+    "aws-sdk": "~2.0.0-rc13",
+    "lodash": "2.4.x",
+    "joi": "2.9.x",
+    "node-uuid": "1.4.x",
+    "async": "0.6.x",
     "readable-stream": "~1.0.26-2"
   },
   "devDependencies": {
-    "mocha": "~1.15.0",
-    "chai": "~1.8.0",
-    "grunt-simple-mocha": "~0.4.0",
-    "grunt": "~0.4.2",
-    "grunt-contrib-jshint": "~0.7.2",
+    "mocha": "1.x.x",
+    "chai": "1.x.x",
+    "grunt-simple-mocha": "0.4.0",
+    "grunt": "0.4.x",
+    "grunt-contrib-jshint": "0.10.x",
     "grunt-regarde": "~0.1.1",
-    "sinon": "~1.7.0",
-    "grunt-cli": "~0.1.11"
+    "sinon": "1.9.x",
+    "grunt-cli": "0.1.x"
   }
 }
