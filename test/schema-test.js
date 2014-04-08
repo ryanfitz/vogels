@@ -75,7 +75,7 @@ describe('schema', function () {
       schema.StringSet('names');
 
       schema.attrs.should.have.keys(['names']);
-      schema.attrs.names.type._type.should.equal('stringset');
+      schema.attrs.names.type._type.should.equal('stringSet');
     });
   });
 
@@ -84,7 +84,7 @@ describe('schema', function () {
       schema.NumberSet('scores');
 
       schema.attrs.should.have.keys(['scores']);
-      schema.attrs.scores.type._type.should.equal('numberset');
+      schema.attrs.scores.type._type.should.equal('numberSet');
     });
   });
 
