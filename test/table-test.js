@@ -777,6 +777,27 @@ describe('table', function () {
       });
     });
 
+    it('should work with a dynamic table name', function (done) {
+      var d = new Date(),
+          tableName = ['Accounts', d.getFullYear(), d.getMonth(), d.getDate()].join('_');
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+      schema.tableName = function () {
+        return tableName;
+      };
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      dynamodb.describeTable.yields(null, {});
+
+      table.describeTable(function (err) {
+        expect(err).to.be.null;
+        dynamodb.describeTable.calledWith({TableName: tableName}).should.be.true;
+        done();
+      });
+
+    });
+
   });
   describe('#updateTable', function () {
 
