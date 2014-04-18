@@ -200,7 +200,17 @@ describe('Serializer', function () {
 
       item.should.eql({age: {N: '0'}});
     });
-
+      
+    it('should serialize JSON attribute', function() {
+      schema.JSON('map');
+      var map = {
+          foo: "Bar", 
+          baz: ["one", "two", "three"]
+      };
+      var expected = JSON.stringify(map);
+      serializer.serializeItem(schema, {map: map})
+        .should.eql({map: {S: expected}});
+    });
 
     it('should serialize boolean attribute', function () {
       schema.Boolean('agree');
@@ -384,6 +394,22 @@ describe('Serializer', function () {
       var item = serializer.deserializeItem(schema, itemResp);
 
       item.created.should.eql(new Date('2013-05-15T21:47:28.479Z'));
+    });
+      
+    it('should parse JSON attribute', function() {
+        schema.JSON('map');
+
+        var map = {
+                foo: "Bar",
+                baz: ["one", "two", "three"]
+        };
+        var expected = JSON.stringify(map);
+        
+        var item = serializer.deserializeItem(schema, {map: {S: expected}});
+        item.map.foo.should.eql(map.foo);
+        item.map.baz.length.should.eql(map.baz.length);
+        item.map.baz[0].should.eql(map.baz[0]);
+        
     });
 
     it('should parse boolean attribute', function () {
