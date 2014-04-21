@@ -211,6 +211,15 @@ describe('Serializer', function () {
       serializer.serializeItem(schema, {map: map})
         .should.eql({map: {S: expected}});
     });
+      
+    it('should return the original object if it cannot serialize invalid JSON', function() {
+      schema.JSON('map');
+      var circularObj = {};
+      circularObj.circularRef = circularObj;
+      circularObj.list = [ circularObj, circularObj ];
+      serializer.serializeItem(schema, {map: circularObj})
+        .should.eql({map: {S: circularObj}});
+    });
 
     it('should serialize boolean attribute', function () {
       schema.Boolean('agree');
@@ -410,6 +419,15 @@ describe('Serializer', function () {
         item.map.baz.length.should.eql(map.baz.length);
         item.map.baz[0].should.eql(map.baz[0]);
         
+    });
+      
+    it('should return original string if invalid JSON', function() {
+      schema.JSON('map');
+
+      var map = "this is not json";
+
+      var item = serializer.deserializeItem(schema, {map: {S: map}});
+      item.map.should.eql(map);
     });
 
     it('should parse boolean attribute', function () {
