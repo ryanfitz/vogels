@@ -3,7 +3,8 @@
 var helper = require('./test-helper'),
     Schema = require('../lib/schema'),
     Item   = require('../lib/item'),
-    batch  = require('../lib/batch');
+    batch  = require('../lib/batch'),
+    _      = require('lodash');
 
 describe('Batch', function () {
   var schema,
@@ -109,5 +110,35 @@ describe('Batch', function () {
       });
     });
 
+    it('should not modify passed in keys', function (done) {
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+      schema.Number('age');
+
+      var keys = _.map(_.range(300), function (num) {
+        var key = {email: 'test' + num + '@test.com', name : 'Test ' + num};
+        serializer.buildKey.withArgs(key).returns({email : {S : key.email}, name : {S: key.name}});
+
+        return key;
+      });
+
+      var item1 = {email: 'test@test.com', name : 'Tim Tester', age: 22};
+      table.runBatchGetItems.yields(null, {});
+      serializer.deserializeItem.returns(item1);
+
+      table.initItem.returns(new Item(item1));
+
+      batch(table, serializer).getItems(keys, function () {
+
+        _.each(_.range(300), function (num) {
+          var key = {email: 'test' + num + '@test.com', name : 'Test ' + num};
+          keys[num].should.eql(key);
+        });
+
+        done();
+      });
+    });
+
   });
+
 });
