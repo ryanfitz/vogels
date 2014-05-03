@@ -465,6 +465,19 @@ describe('Serializer', function () {
       item.stamp.should.equal('1234-5678-9012');
     });
 
+    it('should omit attributes with null values', function () {
+      schema.String('name');
+      schema.String('title');
+
+      var itemResp = {name : {S: 'Tim Tester'} };
+
+      var item = serializer.deserializeItem(schema, itemResp);
+
+      expect(item).to.include.keys('name');
+      expect(item).to.not.include.keys('title');
+    });
+
+
   });
 
   describe('#serializeItemForUpdate', function () {
