@@ -163,6 +163,41 @@ describe('table', function () {
         done();
       });
     });
+
+    it('should get item from dynamic table by hash key', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+      schema.tableName = function () {
+        return 'accounts_2014';
+      };
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts_2014',
+        Key : {
+          email : {S : 'test@test.com'}
+        }
+      };
+
+      var resp = {
+        Item : {email: {S : 'test@test.com'}, name: {S: 'test dude'}}
+      };
+
+      dynamodb.getItem.withArgs(request).yields(null, resp);
+
+      serializer.buildKey.returns({email: resp.Item.email});
+
+      serializer.deserializeItem.withArgs(schema, resp.Item).returns({email : 'test@test.com', name : 'test dude'});
+
+      table.get('test@test.com', function (err, account) {
+        account.should.be.instanceof(Item);
+        account.get('email').should.equal('test@test.com');
+        account.get('name').should.equal('test dude');
+
+        done();
+      });
+    });
   });
 
   describe('#create', function () {
@@ -778,6 +813,7 @@ describe('table', function () {
     });
 
   });
+
   describe('#updateTable', function () {
 
     it('should make update table request', function (done) {
@@ -799,6 +835,45 @@ describe('table', function () {
         done();
       });
     });
+  });
+
+  describe('#tableName', function () {
+
+    it('should return given name', function () {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      table.tableName().should.eql('accounts');
+    });
+
+    it('should return table name set on schema', function () {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+      schema.tableName = 'accounts-2014-03';
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      table.tableName().should.eql('accounts-2014-03');
+    });
+
+    it('should return table name returned from function on schema', function () {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+
+      var d = new Date();
+      var dateString = [d.getFullYear(), d.getMonth() + 1].join('_');
+
+      schema.tableName = function () {
+        return 'accounts_' + dateString;
+      };
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      table.tableName().should.eql('accounts_' + dateString);
+    });
+
   });
 
   describe('hooks', function () {

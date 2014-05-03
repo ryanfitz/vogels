@@ -15,7 +15,9 @@ describe('Batch', function () {
     serializer = helper.mockSerializer(),
 
     table = helper.mockTable();
-    table.config = {name : 'accounts'};
+    table.tableName = function () {
+      return 'accounts';
+    };
     table.schema = schema;
   });
 

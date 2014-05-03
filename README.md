@@ -718,6 +718,22 @@ querystream.on('end', function () {
 });
 ```
 
+### Dynamic Table Names
+vogels supports dynamic table names, useful for storing time series data.
+
+```js
+var Event = vogels.define('Event', function (schema) {
+  schema.String('name', {hashKey: true});
+  schema.Number('total');
+
+  // store monthly event data
+  schema.tableName = function () {
+    var d = new Date();
+    return ['events', d.getFullYear(), d.getMonth() + 1].join('_');
+  };
+});
+```
+
 ## Examples
 
 ```js
@@ -748,7 +764,7 @@ See the [examples][0] for more working sample code.
 
 * Batch Write Items
 * Streaming api support for all operations
-* DDL operations (create table, delete table, update throughput)
+* DDL operations (update throughput)
 * Full intergration test suite
 
 ### License
