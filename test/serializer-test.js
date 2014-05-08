@@ -5,6 +5,7 @@ var serializer = require('../lib/serializer'),
     expect = chai.expect,
     Schema = require('../lib/schema'),
     zlib = require('zlib'),
+    util = require('util'),
     async = require('async');
 
 chai.should();
@@ -201,8 +202,8 @@ describe('Serializer', function () {
       item.should.eql({age: {N: '0'}});
     });
       
-    it('should serialize JSON attribute', function() {
-      schema.JSON('map');
+    it('should serialize Object attribute', function() {
+      schema.Object('map');
       var map = {
           foo: "Bar", 
           baz: ["one", "two", "three"]
@@ -212,8 +213,29 @@ describe('Serializer', function () {
         .should.eql({map: {S: expected}});
     });
       
+    it('should serialize ObjectSet attribute', function() {
+      schema.ObjectSet('mapArray');
+      var mapArray = [
+        {
+          foo: "Bar",
+          baz: ["one", "two", "three"]
+        },
+        {
+          foo: "BarTwo",
+          baz: ["four", "five", "six"]
+        },
+      ];
+        
+      var expected = mapArray.map(function(m){
+          return JSON.stringify(m);
+      });
+        
+      serializer.serializeItem(schema, {mapArray: mapArray})
+        .should.eql({mapArray: {SS: expected}});
+    });
+      
     it('should return the original object if it cannot serialize invalid JSON', function() {
-      schema.JSON('map');
+      schema.Object('map');
       var circularObj = {};
       circularObj.circularRef = circularObj;
       circularObj.list = [ circularObj, circularObj ];
@@ -405,8 +427,33 @@ describe('Serializer', function () {
       item.created.should.eql(new Date('2013-05-15T21:47:28.479Z'));
     });
       
-    it('should parse JSON attribute', function() {
-        schema.JSON('map');
+    it('should parse ObjectSet attribute', function() {
+      schema.ObjectSet('mapArray');
+
+      var mapArray = [
+        {
+          foo: "Bar",
+          baz: ["one", "two", "three"]
+        },
+        {
+          foo: "BarTwo",
+          baz: ["four", "five", "six"]
+        },
+      ];
+      var expected = mapArray.map(function(m){return JSON.stringify(m)});
+
+      var item = serializer.deserializeItem(schema, {mapArray: {SS: expected}});
+      item.mapArray[0].foo.should.eql(mapArray[0].foo);
+      item.mapArray[0].baz.length.should.eql(mapArray[0].baz.length);
+      item.mapArray[0].baz[0].should.eql(mapArray[0].baz[0]);
+      item.mapArray[1].foo.should.eql(mapArray[1].foo);
+      item.mapArray[1].baz.length.should.eql(mapArray[1].baz.length);
+      item.mapArray[1].baz[0].should.eql(mapArray[1].baz[0]);
+
+    });
+      
+    it('should parse Object attribute', function() {
+        schema.Object('map');
 
         var map = {
                 foo: "Bar",
@@ -421,8 +468,8 @@ describe('Serializer', function () {
         
     });
       
-    it('should return original string if invalid JSON', function() {
-      schema.JSON('map');
+    it('should return original string if invalid Object', function() {
+      schema.Object('map');
 
       var map = "this is not json";
 

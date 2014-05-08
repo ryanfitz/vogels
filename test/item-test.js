@@ -25,7 +25,7 @@ describe('item', function() {
     
   it('should not merge an object', function() {
       var schema = new Schema();
-      schema.JSON('json');
+      schema.Object('json');
       
       var table = new Table('mockTable', schema, helper.mockSerializer(), helper.mockDynamoDB());
       var attrs = {
