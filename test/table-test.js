@@ -264,6 +264,38 @@ describe('table', function () {
       });
     });
 
+    it('should omit null values', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+      schema.Number('age').allow(null);
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        Item : {
+          email : {S : 'test@test.com'},
+          name  : {S : 'Tim Test'}
+        }
+      };
+
+      var item = {email : 'test@test.com', name : 'Tim Test', age : null};
+      dynamodb.putItem.withArgs(request).yields(null, {});
+
+      serializer.serializeItem.withArgs(schema, {email : 'test@test.com', name : 'Tim Test'}).returns(request.Item);
+
+      table.create(item, function (err, account) {
+        account.should.be.instanceof(Item);
+
+        account.get('email').should.equal('test@test.com');
+        account.get('name').should.equal('Tim Test');
+
+        expect(account.toJSON()).to.have.keys(['email', 'name']);
+
+        done();
+      });
+    });
+
   });
 
   describe('#update', function () {
