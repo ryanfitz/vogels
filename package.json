@@ -20,7 +20,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "~2.0.0-rc13",
+    "aws-sdk": "~2.0.14",
     "lodash": "2.4.x",
     "joi": "2.9.x",
     "node-uuid": "1.4.x",

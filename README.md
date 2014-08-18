@@ -391,6 +391,18 @@ BlogPost
   .exec();
 ```
 
+Query Filters allow you to further filter results on non-key attributes.
+
+```js
+BlogPost
+  .query('werner@example.com')
+  .where('title').equals('Expanding')
+  .filter('tags').contains('cloud')
+  .exec();
+```
+
+See the queryFilter.js [example][0] for more examples of using query filters
+
 #### Global Indexes
 First, define a model with a global secondary index.
 
