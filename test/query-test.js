@@ -272,6 +272,73 @@ describe('Query', function () {
 
   });
 
+  describe('#filter', function () {
+    var query;
+
+    beforeEach(function () {
+      query = new Query('tim', table, serializer);
+
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+      schema.Date('created', {secondaryIndex: true});
+      schema.Number('age');
+    });
+
+    it('should have equals clause', function() {
+      serializer.serializeItem.withArgs(schema, {age: 5}).returns({age: {N: '5'}});
+
+      query = query.filter('age').equals(5);
+
+      query.request.QueryFilter.age.should.eql({AttributeValueList: [{N: '5'}], ComparisonOperator: 'EQ'});
+    });
+
+    it('should have exists clause', function() {
+      query = query.filter('age').exists();
+
+      query.request.QueryFilter.age.should.eql({ComparisonOperator: 'NOT_NULL'});
+    });
+
+    it('should have not exists clause', function() {
+      query = query.filter('age').exists(false);
+
+      query.request.QueryFilter.age.should.eql({ComparisonOperator: 'NULL'});
+    });
+
+    it('should have between clause', function() {
+      serializer.serializeItem.withArgs(schema, {age: 5}).returns({age: {N: '5'}});
+      serializer.serializeItem.withArgs(schema, {age: 7}).returns({age: {N: '7'}});
+
+      query = query.filter('age').between([5, 7]);
+
+      var expected = {
+        AttributeValueList: [
+          {N: '5'},
+          {N: '7'}
+        ],
+        ComparisonOperator: 'BETWEEN'
+      };
+
+      query.request.QueryFilter.age.should.eql(expected);
+    });
+
+    it('should have IN clause', function() {
+      serializer.serializeItem.withArgs(schema, {age: 5}).returns({age: {N: '5'}});
+      serializer.serializeItem.withArgs(schema, {age: 7}).returns({age: {N: '7'}});
+
+      query = query.filter('age').in([5, 7]);
+
+      var expected = {
+        AttributeValueList: [
+          {N: '5'},
+          {N: '7'}
+        ],
+        ComparisonOperator: 'IN'
+      };
+
+      query.request.QueryFilter.age.should.eql(expected);
+    });
+
+  });
 
   describe('#loadAll', function () {
 
