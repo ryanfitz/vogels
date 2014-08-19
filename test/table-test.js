@@ -268,6 +268,8 @@ describe('table', function () {
       schema.String('email', {hashKey: true});
       schema.String('name');
       schema.Number('age').allow(null);
+      schema.NumberSet('favoriteNumbers').allow(null);
+      schema.NumberSet('luckyNumbers').allow(null);
 
       table = new Table('accounts', schema, serializer, dynamodb);
 
@@ -275,22 +277,24 @@ describe('table', function () {
         TableName: 'accounts',
         Item : {
           email : {S : 'test@test.com'},
-          name  : {S : 'Tim Test'}
+          name  : {S : 'Tim Test'},
+          luckyNumbers: {NS: [1, 2, 3]}
         }
       };
 
-      var item = {email : 'test@test.com', name : 'Tim Test', age : null};
+      var item = {email : 'test@test.com', name : 'Tim Test', age : null, favoriteNumbers: [], luckyNumbers: [1, 2, 3]};
       dynamodb.putItem.withArgs(request).yields(null, {});
 
-      serializer.serializeItem.withArgs(schema, {email : 'test@test.com', name : 'Tim Test'}).returns(request.Item);
+      serializer.serializeItem.withArgs(schema, {email : 'test@test.com', name : 'Tim Test', luckyNumbers: [1, 2, 3]}).returns(request.Item);
 
       table.create(item, function (err, account) {
         account.should.be.instanceof(Item);
 
         account.get('email').should.equal('test@test.com');
         account.get('name').should.equal('Tim Test');
+        account.get('luckyNumbers').should.eql([1, 2, 3]);
 
-        expect(account.toJSON()).to.have.keys(['email', 'name']);
+        expect(account.toJSON()).to.have.keys(['email', 'name', 'luckyNumbers']);
 
         done();
       });
