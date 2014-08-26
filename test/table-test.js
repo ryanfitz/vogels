@@ -299,6 +299,38 @@ describe('table', function () {
         done();
       });
     });
+    
+    it('should omit empty string values values', function (done) {
+      schema.String('email', {hashKey: true});
+      schema.String('name');
+      schema.String('note').allow('');
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        Item : {
+          email : {S : 'test@test.com'},
+          name  : {S : 'Tim Test'}
+        }
+      };
+
+      var item = {email : 'test@test.com', name : 'Tim Test', note: ''};
+      dynamodb.putItem.withArgs(request).yields(null, {});
+
+      serializer.serializeItem.withArgs(schema, {email : 'test@test.com', name : 'Tim Test'}).returns(request.Item);
+
+      table.create(item, function (err, account) {
+        account.should.be.instanceof(Item);
+
+        account.get('email').should.equal('test@test.com');
+        account.get('name').should.equal('Tim Test');
+
+        expect(account.toJSON()).to.have.keys(['email', 'name']);
+
+        done();
+      });
+    });
 
   });
 
