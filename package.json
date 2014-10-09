@@ -28,13 +28,13 @@
     "readable-stream": "~1.0.26-2"
   },
   "devDependencies": {
-    "mocha": "1.x.x",
     "chai": "1.x.x",
-    "grunt-simple-mocha": "0.4.0",
     "grunt": "0.4.x",
+    "grunt-cli": "0.1.x",
     "grunt-contrib-jshint": "0.10.x",
-    "grunt-regarde": "~0.1.1",
-    "sinon": "1.9.x",
-    "grunt-cli": "0.1.x"
+    "grunt-contrib-watch": "0.6.x",
+    "grunt-simple-mocha": "0.4.x",
+    "mocha": "1.x.x",
+    "sinon": "1.9.x"
   }
 }

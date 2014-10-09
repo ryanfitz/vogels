@@ -21,29 +21,24 @@ module.exports = function(grunt) {
         src: ['examples/**/*.js']
       }
     },
-    regarde: {
+    watch: {
       gruntfile: {
         files: '<%= jshint.gruntfile.src %>',
-        tasks: ['jshint:gruntfile'],
-        spawn: true
+        tasks: ['jshint:gruntfile']
       },
       lib: {
         files: '<%= jshint.lib.src %>',
-        tasks: ['jshint:lib', 'simplemocha'],
-        spawn: true
+        tasks: ['jshint:lib', 'simplemocha']
       },
       test: {
         files: '<%= jshint.test.src %>',
-        tasks: ['jshint:test', 'simplemocha'],
-        spawn: true
+        tasks: ['jshint:test', 'simplemocha']
       },
-      examples: {
+      examples : {
         files: '<%= jshint.examples.src %>',
-        tasks: ['jshint:examples'],
-        spawn: true
+        tasks: ['jshint:examples']
       }
     },
-
     simplemocha: {
       options: {
         globals: ['should'],
@@ -60,7 +55,7 @@ module.exports = function(grunt) {
 
     // These plugins provide necessary tasks.
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-regarde');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-simple-mocha');
 
   grunt.registerTask('test', ['simplemocha']);
