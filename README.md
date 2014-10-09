@@ -64,6 +64,7 @@ Vogels provides the following schema types:
 * Date
 * UUID
 * TimeUUID
+* JSON
 
 #### UUID
 UUIDs can be declared for any attributes, including hash and range keys. By
@@ -77,6 +78,12 @@ var Tweet = vogels.define('Account', function (schema) {
   schema.Date('created', {default: Date.now});
 });
 ```
+
+#### JSON
+You can store objects as JSON by using the JSON type. **Note: It is considered
+better to use a StringSet or NumberSet when you only need to store an array of
+data, rather than using the JSON type.**  In this way you can take advantage of
+built in functionality of DynamoDB to more easily maintain your set.
 
 ### Configuration
 After you've defined your model you can configure the table name to use.

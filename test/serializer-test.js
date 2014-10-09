@@ -5,6 +5,7 @@ var serializer = require('../lib/serializer'),
     expect = chai.expect,
     Schema = require('../lib/schema'),
     zlib = require('zlib'),
+    util = require('util'),
     async = require('async');
 
 chai.should();
@@ -200,7 +201,47 @@ describe('Serializer', function () {
 
       item.should.eql({age: {N: '0'}});
     });
-
+      
+    it('should serialize Object attribute', function() {
+      schema.Object('map');
+      var map = {
+          foo: "Bar", 
+          baz: ["one", "two", "three"]
+      };
+      var expected = JSON.stringify(map);
+      serializer.serializeItem(schema, {map: map})
+        .should.eql({map: {S: expected}});
+    });
+      
+    it('should serialize ObjectSet attribute', function() {
+      schema.ObjectSet('mapArray');
+      var mapArray = [
+        {
+          foo: "Bar",
+          baz: ["one", "two", "three"]
+        },
+        {
+          foo: "BarTwo",
+          baz: ["four", "five", "six"]
+        },
+      ];
+        
+      var expected = mapArray.map(function(m){
+          return JSON.stringify(m);
+      });
+        
+      serializer.serializeItem(schema, {mapArray: mapArray})
+        .should.eql({mapArray: {SS: expected}});
+    });
+    
+    it('should return the original object if it cannot serialize invalid JSON', function() {
+      schema.Object('map');
+      var circularObj = {};
+      circularObj.circularRef = circularObj;
+      circularObj.list = [ circularObj, circularObj ];
+      serializer.serializeItem(schema, {map: circularObj})
+        .should.eql({map: {S: circularObj}});
+    });
 
     it('should serialize boolean attribute', function () {
       schema.Boolean('agree');
@@ -385,6 +426,81 @@ describe('Serializer', function () {
 
       item.created.should.eql(new Date('2013-05-15T21:47:28.479Z'));
     });
+      
+    it('should parse ObjectSet attribute', function() {
+      schema.ObjectSet('mapArray');
+
+      var mapArray = [
+        {
+          foo: "Bar",
+          baz: ["one", "two", "three"]
+        },
+        {
+          foo: "BarTwo",
+          baz: ["four", "five", "six"]
+        },
+      ];
+      var expected = mapArray.map(function(m){return JSON.stringify(m)});
+
+      var item = serializer.deserializeItem(schema, {mapArray: {SS: expected}});
+      item.mapArray[0].foo.should.eql(mapArray[0].foo);
+      item.mapArray[0].baz.length.should.eql(mapArray[0].baz.length);
+      item.mapArray[0].baz[0].should.eql(mapArray[0].baz[0]);
+      item.mapArray[1].foo.should.eql(mapArray[1].foo);
+      item.mapArray[1].baz.length.should.eql(mapArray[1].baz.length);
+      item.mapArray[1].baz[0].should.eql(mapArray[1].baz[0]);
+
+    });
+    
+    it('should parse string and convert to ObjectSet attribute', function() {
+      schema.ObjectSet('mapArray', {convertStringToSet:true});
+
+      var mapArray = [
+        {
+          foo: "Bar",
+          baz: ["one", "two", "three"]
+        },
+        {
+          foo: "BarTwo",
+          baz: ["four", "five", "six"]
+        },
+      ];
+      var expected = JSON.stringify(mapArray);
+
+      var item = serializer.deserializeItem(schema, {mapArray: {S: expected}});
+      item.mapArray[0].foo.should.eql(mapArray[0].foo);
+      item.mapArray[0].baz.length.should.eql(mapArray[0].baz.length);
+      item.mapArray[0].baz[0].should.eql(mapArray[0].baz[0]);
+      item.mapArray[1].foo.should.eql(mapArray[1].foo);
+      item.mapArray[1].baz.length.should.eql(mapArray[1].baz.length);
+      item.mapArray[1].baz[0].should.eql(mapArray[1].baz[0]);
+
+    });
+      
+    it('should parse Object attribute', function() {
+        schema.Object('map');
+
+        var map = {
+                foo: "Bar",
+                baz: ["one", "two", "three"]
+        };
+        var expected = JSON.stringify(map);
+        
+        var item = serializer.deserializeItem(schema, {map: {S: expected}});
+        item.map.foo.should.eql(map.foo);
+        item.map.baz.length.should.eql(map.baz.length);
+        item.map.baz[0].should.eql(map.baz[0]);
+        
+    });
+      
+    it('should return original string if invalid Object', function() {
+      schema.Object('map');
+
+      var map = "this is not json";
+
+      var item = serializer.deserializeItem(schema, {map: {S: map}});
+      item.map.should.eql(map);
+    });
 
     it('should parse boolean attribute', function () {
       schema.Boolean('agree');
@@ -405,11 +521,33 @@ describe('Serializer', function () {
 
       item.names.should.eql(['Bob', 'Joe', 'Tim']);
     });
+    
+    it('should parse string set attribute', function () {
+      schema.StringSet('names', {convertStringToSet:true});
+
+      var j = JSON.stringify(['Bob', 'Joe', 'Tim']);
+      var itemResp = {names : {S: j} };
+
+      var item = serializer.deserializeItem(schema, itemResp);
+
+      item.names.should.eql(['Bob', 'Joe', 'Tim']);
+    });
 
     it('should parse number set attribute', function () {
       schema.NumberSet('nums');
 
       var itemResp = {nums : {NS: ['18', '22', '23']} };
+
+      var item = serializer.deserializeItem(schema, itemResp);
+
+      item.nums.should.eql([18, 22, 23]);
+    });
+    
+    it('should convert string and parse number set attribute', function () {
+      schema.NumberSet('nums', {convertStringToSet:true});
+
+      var j = JSON.stringify([18, 22, 23]);
+      var itemResp = {nums : {S: j} };
 
       var item = serializer.deserializeItem(schema, itemResp);
 
