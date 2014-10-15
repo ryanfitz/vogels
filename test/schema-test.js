@@ -38,7 +38,18 @@ describe('schema', function () {
     it('should set secondaryIndexes', function () {
       schema.String('name', {secondaryIndex: true});
 
-      schema.secondaryIndexes.should.eql(['name']);
+      schema.secondaryIndexes.should.eql({name: 'name'});
+    });
+
+    it('should set secondaryIndex options if an object is provided for the secondaryIndex key', function () {
+      var secondaryIndexOptions = {
+        Projection : {
+          ProjectionType: 'KEYS_ONLY'
+        }
+      };
+      schema.String('name', {secondaryIndex: secondaryIndexOptions});
+
+      schema.secondaryIndexes.should.eql({name: secondaryIndexOptions});
     });
 
   });
