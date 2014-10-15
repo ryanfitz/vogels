@@ -729,6 +729,52 @@ describe('table', function () {
       });
     });
 
+    it('should create table with secondary index when secondaryIndex options are specified', function (done) {
+      schema.String('name', {hashKey: true});
+      schema.String('email', {rangeKey: true});
+      schema.Number('age', {secondaryIndex: {
+        Projection: {
+          ProjectionType: 'KEYS_ONLY'
+        }
+      }});
+
+      table = new Table('accounts', schema, serializer, dynamodb);
+
+      var request = {
+        TableName: 'accounts',
+        AttributeDefinitions : [
+          { AttributeName: 'name', AttributeType: 'S' },
+          { AttributeName: 'email', AttributeType: 'S' },
+          { AttributeName: 'age', AttributeType: 'N' }
+        ],
+        KeySchema: [
+          { AttributeName: 'name', KeyType: 'HASH' },
+          { AttributeName: 'email', KeyType: 'RANGE' }
+        ],
+        LocalSecondaryIndexes : [
+          {
+            IndexName : 'ageIndex',
+            KeySchema: [
+              { AttributeName: 'name', KeyType: 'HASH' },
+              { AttributeName: 'age', KeyType: 'RANGE' }
+            ],
+            Projection : {
+              ProjectionType : 'KEYS_ONLY'
+            }
+          }
+        ],
+        ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+      };
+
+      dynamodb.createTable.yields(null, {});
+
+      table.createTable({readCapacity : 5, writeCapacity: 5}, function (err) {
+        expect(err).to.be.null;
+        dynamodb.createTable.calledWith(request).should.be.true;
+        done();
+      });
+    });
+
     it('should create table with global secondary index', function (done) {
       schema.String('userId', {hashKey: true});
       schema.String('gameTitle', {rangeKey: true});
