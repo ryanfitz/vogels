@@ -506,7 +506,21 @@ BlogPost
   .exec(callback);
 ```
 
-Learn more about [secondary indexes][3]
+You can also specify secondary index options by passing an object literal instead of `true` for the value of `secondaryIndex`:
+
+```js
+var Author = vogels.define('Author', function (schema) {
+  schema.String('email', {hashKey: true});
+  schema.String('name');
+  schema.Date('updated', {secondaryIndex: {
+    Projection: {
+      ProjectionType: 'KEYS_ONLY'
+    }
+  }});
+});
+```
+
+Learn more about [secondary indexes][3].
 
 ### Scan
 Vogels provides a flexible and chainable api for scanning over all your items
