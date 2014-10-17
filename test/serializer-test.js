@@ -477,6 +477,25 @@ describe('Serializer', function () {
       expect(item).to.not.include.keys('title');
     });
 
+    it('should parse map attribute', function () {
+      schema.Map('skills');
+
+      var itemResp = {skills: {M: { programming:{M: { nodejs:{N:"10"}, ruby:{N:"10"} } } }}};
+
+      var item = serializer.deserializeItem(schema, itemResp);
+
+      item.skills.should.eql({programming: {nodejs: 10, ruby: 10}});
+    });
+
+    it('should parse list attribute', function () {
+      schema.List('tags');
+
+      var itemResp = {tags: { L: [{S: 'john'}, {N: "0"}] }};
+
+      var item = serializer.deserializeItem(schema, itemResp);
+
+      item.tags.should.eql(['john', 0]);
+    });
 
   });
 
@@ -520,7 +539,7 @@ describe('Serializer', function () {
       item.should.eql({ skills: {Action: 'PUT', Value: {M: { programming:{M: { nodejs:{N:"10"}, ruby:{N:"10"} }} }} }});
     });
 
-    it('should serialize ist attribute', function () {
+    it('should serialize list attribute', function () {
       schema.List('tags');
 
       var item = serializer.serializeItemForUpdate(schema, 'PUT', {tags: ['john', 0]});
