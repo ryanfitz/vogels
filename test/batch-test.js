@@ -4,6 +4,8 @@ var helper = require('./test-helper'),
     Schema = require('../lib/schema'),
     Item   = require('../lib/item'),
     batch  = require('../lib/batch'),
+    sinon  = require('sinon'),
+    should = require('chai').should(),
     _      = require('lodash');
 
 describe('Batch', function () {
@@ -16,9 +18,7 @@ describe('Batch', function () {
     serializer = helper.mockSerializer(),
 
     table = helper.mockTable();
-    table.tableName = function () {
-      return 'accounts';
-    };
+    table.config = { name: 'accounts' };
     table.schema = schema;
   });
 
@@ -60,6 +60,49 @@ describe('Batch', function () {
       batch(table, serializer).getItems(['test@test.com', 'foo@example.com'], function (err, items) {
         items.should.have.length(2);
         items[0].get('email').should.equal('test@test.com');
+
+        done();
+      });
+    });
+
+    it('should replay unprocessed items', function(done) {
+      var isFirstCall = true;
+      table.runBatchGetItems = sinon.spy(function(request, callback) {
+        var response = {
+          Responses: {
+            accounts: request.RequestItems.accounts.Keys
+          }
+        };
+
+        // If this is the first call, make the last item fail
+        if (isFirstCall === true) {
+          response.UnprocessedKeys = {
+            accounts: {
+              Keys: [_.last(response.Responses.accounts)]
+            }
+          };
+          response.Responses.accounts = _.initial(response.Responses.accounts);
+        }
+        isFirstCall = false;
+        callback(null, response);
+      });
+
+      var emails = ['test@test.com', 'foo@example.com', 'last@example.com'];
+      _.each(emails, function(email) {
+        serializer.buildKey.withArgs(email).returns({email : {S : email}});
+      });
+
+      batch(table, serializer).getItems(['test@test.com', 'foo@example.com', 'last@example.com'], function(err, items) {
+        if (err) return done(err);
+
+        table.runBatchGetItems.calledTwice.should.equal(true);
+
+        var requestKeys = table.runBatchGetItems.getCall(0).args[0].RequestItems.accounts.Keys;
+        requestKeys.length.should.equal(3);
+
+        requestKeys = table.runBatchGetItems.getCall(1).args[0].RequestItems.accounts.Keys;
+        requestKeys.length.should.equal(1);
+        requestKeys[0].email['S'].should.eq('last@example.com');
 
         done();
       });
