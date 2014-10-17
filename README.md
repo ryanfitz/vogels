@@ -64,6 +64,8 @@ Vogels provides the following schema types:
 * Date
 * UUID
 * TimeUUID
+* Map
+* List
 
 #### UUID
 UUIDs can be declared for any attributes, including hash and range keys. By
@@ -77,6 +79,33 @@ var Tweet = vogels.define('Account', function (schema) {
   schema.Date('created', {default: Date.now});
 });
 ```
+
+#### Map
+Map can be declared for any attributes, except for hash and range keys.
+It can store an object in the attribute.
+
+```js
+var Photo = vogels.define('Photo', function (schema) {
+  schema.String('userid', {hashKey: true});
+  schema.Map('tags');
+});
+
+Photo.create({userid:'john', tags: {emily: {x:10, y:8}}}, console.log);
+```
+
+#### List
+Map can be declared for any attributes, except for hash and range keys.
+It can store an array in the attribute.
+
+```js
+var Photo = vogels.define('Photo', function (schema) {
+  schema.String('userid', {hashKey: true});
+  schema.List('likes');
+});
+
+Photo.create({userid:'john', likes: ['emily']}, console.log);
+```
+
 
 ### Configuration
 After you've defined your model you can configure the table name to use.
