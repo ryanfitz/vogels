@@ -124,6 +124,25 @@ describe('schema', function () {
     });
   });
 
+  describe('#Map', function () {
+    it('should set as map', function () {
+      schema.Map('scores');
+
+      schema.attrs.should.have.keys(['scores']);
+      schema.attrs.scores.type._type.should.equal('map');
+    });
+  });
+
+
+  describe('#List', function () {
+    it('should set as list', function () {
+      schema.List('scores');
+
+      schema.attrs.should.have.keys(['scores']);
+      schema.attrs.scores.type._type.should.equal('list');
+    });
+  });
+
 
   describe('#validate', function () {
 
@@ -168,14 +187,18 @@ describe('schema', function () {
       schema.Number('age', {default: 3});
       schema.Number('posts', {default: 0});
       schema.Boolean('terms', {default: false});
+      schema.Map('skills', {default: {}});
+      schema.List('jobs', {default: []});
 
-      schema.defaults().should.have.keys(['name', 'age', 'posts', 'terms']);
+      schema.defaults().should.have.keys(['name', 'age', 'posts', 'terms', 'skills', 'jobs']);
     });
 
     it('should return empty object when no defaults exist', function () {
       schema.String('email', {hashKey: true});
       schema.String('name');
       schema.Number('age');
+      schema.Map('skills');
+      schema.List('jobs');
 
       schema.defaults().should.be.empty;
     });
@@ -186,12 +209,16 @@ describe('schema', function () {
       schema.String('email', {hashKey: true});
       schema.String('name', {default: 'Foo Bar'});
       schema.Number('age', {default: 3});
+      schema.Map('skills', {default: {name:'js'}});
+      schema.List('jobs', {default: [{name:'engineer'}]});
 
       var d = schema.applyDefaults({email: 'foo@bar.com'});
 
       d.email.should.equal('foo@bar.com');
       d.name.should.equal('Foo Bar');
       d.age.should.equal(3);
+      d.skills.should.eql({name:'js'});
+      d.jobs.should.eql([{name:'engineer'}]);
     });
 
     it('should return result of default functions', function () {

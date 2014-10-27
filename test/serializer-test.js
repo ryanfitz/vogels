@@ -478,7 +478,9 @@ describe('Serializer', function () {
     });
 
     it('should parse map attribute', function () {
-      schema.Map('skills');
+      schema.Map('skills', function(schema){
+        schema.Map('programming');
+      });
 
       var itemResp = {skills: {M: { programming:{M: { nodejs:{N:"10"}, ruby:{N:"10"} } } }}};
 
@@ -488,13 +490,16 @@ describe('Serializer', function () {
     });
 
     it('should parse list attribute', function () {
-      schema.List('tags');
+      schema.List('tags', function(schema){
+        schema.String('name');
+        schema.Number('point');
+      });
 
-      var itemResp = {tags: { L: [{S: 'john'}, {N: "0"}] }};
+      var itemResp = {tags: { L: [{M: {name: {S: 'john'}, point: {N: "10"}}}, {M: {name: {S: 'lennon'}, point: {N: "20"}}}] }};
 
       var item = serializer.deserializeItem(schema, itemResp);
 
-      item.tags.should.eql(['john', 0]);
+      item.tags.should.eql([{name: 'john', point: 10}, {name: 'lennon', point: 20}]);
     });
 
   });
@@ -532,7 +537,9 @@ describe('Serializer', function () {
     });
 
     it('should serialize map attribute', function () {
-      schema.Map('skills');
+      schema.Map('skills', function(schema){
+        schema.Map('programming');
+      });
 
       var item = serializer.serializeItemForUpdate(schema, 'PUT', {skills: {programming: {nodejs: 10, ruby: 10}}});
 
@@ -540,11 +547,14 @@ describe('Serializer', function () {
     });
 
     it('should serialize list attribute', function () {
-      schema.List('tags');
+      schema.List('tags', function(schema){
+        schema.String('name');
+        schema.Number('point');
+      });
 
-      var item = serializer.serializeItemForUpdate(schema, 'PUT', {tags: ['john', 0]});
+      var item = serializer.serializeItemForUpdate(schema, 'PUT', {tags: [{name: 'john', point: 10}, {name: 'lennon', point: 20}]});
 
-      item.should.eql({ tags: {Action: 'PUT', Value: { L: [{S: 'john'}, {N: "0"}] } }});
+      item.should.eql({ tags: {Action: 'PUT', Value: { L: [{M: {name: {S: 'john'}, point: {N: "10"}}}, {M: {name: {S: 'lennon'}, point: {N: "20"}}}] }}});
     });
 
     it('should serialize null value to a DELETE action', function () {
