@@ -93,8 +93,20 @@ var Photo = vogels.define('Photo', function (schema) {
 Photo.create({userid:'john', tags: {emily: {x:10, y:8}}}, console.log);
 ```
 
+Map can recursively define its schema:
+
+```js
+var Photo = vogels.define('Photo', function (schema) {
+  schema.String('userid', {hashKey: true});
+  schema.Map('tags', function(schema) {
+    schema.String('name');
+    schema.String('url');
+  });
+});
+```
+
 #### List
-Map can be declared for any attributes, except for hash and range keys.
+List can be declared for any attributes, except for hash and range keys.
 It can store an array in the attribute.
 
 ```js
@@ -106,6 +118,17 @@ var Photo = vogels.define('Photo', function (schema) {
 Photo.create({userid:'john', likes: ['emily']}, console.log);
 ```
 
+List can define schema of its element:
+
+```js
+var Photo = vogels.define('Photo', function (schema) {
+  schema.String('userid', {hashKey: true});
+  schema.List('likes', function(schema) {
+    schema.String('userid');
+    schema.Date('likedAt');
+  });
+});
+```
 
 ### Configuration
 After you've defined your model you can configure the table name to use.
