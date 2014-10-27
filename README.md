@@ -98,9 +98,10 @@ Map can recursively define its schema:
 ```js
 var Photo = vogels.define('Photo', function (schema) {
   schema.String('userid', {hashKey: true});
-  schema.Map('tags', function(schema) {
+  schema.Map('location', function(schema) {
     schema.String('name');
-    schema.String('url');
+    schema.String('latitude');
+    schema.String('longitude');
   });
 });
 ```
