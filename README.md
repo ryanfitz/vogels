@@ -64,6 +64,8 @@ Vogels provides the following schema types:
 * Date
 * UUID
 * TimeUUID
+* Map
+* List
 
 #### UUID
 UUIDs can be declared for any attributes, including hash and range keys. By
@@ -75,6 +77,57 @@ var Tweet = vogels.define('Account', function (schema) {
   schema.UUID('TweetID', {hashKey: true});
   schema.String('content');
   schema.Date('created', {default: Date.now});
+});
+```
+
+#### Map
+Map can be declared for any attributes, except for hash and range keys.
+It can store an object in the attribute.
+
+```js
+var Photo = vogels.define('Photo', function (schema) {
+  schema.String('userid', {hashKey: true});
+  schema.Map('tags');
+});
+
+Photo.create({userid:'john', tags: {emily: {x:10, y:8}}}, console.log);
+```
+
+Map can recursively define its schema:
+
+```js
+var Photo = vogels.define('Photo', function (schema) {
+  schema.String('userid', {hashKey: true});
+  schema.Map('location', function(schema) {
+    schema.String('name');
+    schema.String('latitude');
+    schema.String('longitude');
+  });
+});
+```
+
+#### List
+List can be declared for any attributes, except for hash and range keys.
+It can store an array in the attribute.
+
+```js
+var Photo = vogels.define('Photo', function (schema) {
+  schema.String('userid', {hashKey: true});
+  schema.List('likes');
+});
+
+Photo.create({userid:'john', likes: ['emily']}, console.log);
+```
+
+List can define schema of its element:
+
+```js
+var Photo = vogels.define('Photo', function (schema) {
+  schema.String('userid', {hashKey: true});
+  schema.List('likes', function(schema) {
+    schema.String('userid');
+    schema.Date('likedAt');
+  });
 });
 ```
 

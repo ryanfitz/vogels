@@ -113,7 +113,7 @@ describe('Serializer', function () {
       var data = { email : 'test@example.com', adult: false };
       var keys = serializer.buildKey(data, null, schema);
 
-      keys.should.eql({email: {S: 'test@example.com'}, adult: {N : '0'}});
+      keys.should.eql({email: {S: 'test@example.com'}, adult: {BOOL : false}});
     });
 
   });
@@ -205,13 +205,13 @@ describe('Serializer', function () {
     it('should serialize boolean attribute', function () {
       schema.Boolean('agree');
 
-      serializer.serializeItem(schema, {agree: true}).should.eql({agree: {N: '1'}});
-      serializer.serializeItem(schema, {agree: 'true'}).should.eql({agree: {N: '1'}});
+      serializer.serializeItem(schema, {agree: true}).should.eql({agree: {BOOL: true}});
+      serializer.serializeItem(schema, {agree: 'true'}).should.eql({agree: {BOOL: true}});
 
-      serializer.serializeItem(schema, {agree: false}).should.eql({agree: {N: '0'}});
-      serializer.serializeItem(schema, {agree: 'false'}).should.eql({agree: {N: '0'}});
-      //serializer.serializeItem(schema, {agree: null}).should.eql({agree: {N: '0'}});
-      serializer.serializeItem(schema, {agree: 0}).should.eql({agree: {N: '0'}});
+      serializer.serializeItem(schema, {agree: false}).should.eql({agree: {BOOL: false}});
+      serializer.serializeItem(schema, {agree: 'false'}).should.eql({agree: {BOOL: false}});
+      //serializer.serializeItem(schema, {agree: null}).should.eql({agree: {BOOL: false}});
+      serializer.serializeItem(schema, {agree: 0}).should.eql({agree: {BOOL: false}});
     });
 
     it('should serialize date attribute', function () {
@@ -477,6 +477,30 @@ describe('Serializer', function () {
       expect(item).to.not.include.keys('title');
     });
 
+    it('should parse map attribute', function () {
+      schema.Map('skills', function(schema){
+        schema.Map('programming');
+      });
+
+      var itemResp = {skills: {M: { programming:{M: { nodejs:{N:"10"}, ruby:{N:"10"} } } }}};
+
+      var item = serializer.deserializeItem(schema, itemResp);
+
+      item.skills.should.eql({programming: {nodejs: 10, ruby: 10}});
+    });
+
+    it('should parse list attribute', function () {
+      schema.List('tags', function(schema){
+        schema.String('name');
+        schema.Number('point');
+      });
+
+      var itemResp = {tags: { L: [{M: {name: {S: 'john'}, point: {N: "10"}}}, {M: {name: {S: 'lennon'}, point: {N: "20"}}}] }};
+
+      var item = serializer.deserializeItem(schema, itemResp);
+
+      item.tags.should.eql([{name: 'john', point: 10}, {name: 'lennon', point: 20}]);
+    });
 
   });
 
@@ -510,6 +534,27 @@ describe('Serializer', function () {
         age    : {Action : 'PUT', Value : {N  : '25'} },
         scores : {Action : 'PUT', Value : {NS : ['94', '92', '100']} }
       });
+    });
+
+    it('should serialize map attribute', function () {
+      schema.Map('skills', function(schema){
+        schema.Map('programming');
+      });
+
+      var item = serializer.serializeItemForUpdate(schema, 'PUT', {skills: {programming: {nodejs: 10, ruby: 10}}});
+
+      item.should.eql({ skills: {Action: 'PUT', Value: {M: { programming:{M: { nodejs:{N:"10"}, ruby:{N:"10"} }} }} }});
+    });
+
+    it('should serialize list attribute', function () {
+      schema.List('tags', function(schema){
+        schema.String('name');
+        schema.Number('point');
+      });
+
+      var item = serializer.serializeItemForUpdate(schema, 'PUT', {tags: [{name: 'john', point: 10}, {name: 'lennon', point: 20}]});
+
+      item.should.eql({ tags: {Action: 'PUT', Value: { L: [{M: {name: {S: 'john'}, point: {N: "10"}}}, {M: {name: {S: 'lennon'}, point: {N: "20"}}}] }}});
     });
 
     it('should serialize null value to a DELETE action', function () {
@@ -570,6 +615,7 @@ describe('Serializer', function () {
         ages : {Action: 'DELETE', Value: {NS: ['2', '3']}}
       });
     });
+
 
   });
 });
