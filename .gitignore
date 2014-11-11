@@ -5,3 +5,5 @@ Debug/
 Release/
 npm-debug.log
 tmp
+covreporter/
+coverage/

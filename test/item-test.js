@@ -4,21 +4,101 @@ var Item   = require('../lib/item'),
     Table  = require('../lib/table'),
     Schema = require('../lib/schema'),
     chai   = require('chai'),
-    helper = require('./test-helper');
+    expect = chai.expect,
+    helper = require('./test-helper'),
+    serializer = require('../lib/serializer'),
+    Joi    = require('joi');
 
 chai.should();
 
 describe('item', function() {
-  it('JSON.stringify should only serialize attrs', function() {
-    var schema = new Schema();
-    schema.Number('num');
-    schema.String('name');
+  var table;
 
-    var table = new Table('mockTable', schema, helper.mockSerializer(), helper.mockDynamoDB());
+  beforeEach(function () {
+    var config = {
+      hashKey: 'num',
+      schema : {
+        num : Joi.number(),
+        name : Joi.string()
+      }
+    };
+
+    var schema = new Schema(config);
+
+    table = new Table('mockTable', schema, serializer, helper.mockDynamoDB());
+  });
+
+  it('JSON.stringify should only serialize attrs', function() {
     var attrs = {num: 1, name: 'foo'};
     var item = new Item(attrs, table);
     var stringified = JSON.stringify(item);
 
     stringified.should.equal(JSON.stringify(attrs));
+  });
+
+  describe('#save', function () {
+
+    it('should return error', function (done) {
+      table.docClient.putItem.yields(new Error('fail'));
+
+      var attrs = {num: 1, name: 'foo'};
+      var item = new Item(attrs, table);
+
+      item.save(function (err, data) {
+        expect(err).to.exist;
+        expect(data).to.not.exist;
+
+        return done();
+      });
+
+    });
+
+  });
+
+  describe('#update', function () {
+    it('should return item', function (done) {
+      table.docClient.updateItem.yields(null, {Attributes : {num : 1, name : 'foo'}});
+
+      var attrs = {num: 1, name: 'foo'};
+      var item = new Item(attrs, table);
+
+      item.update(function (err, data) {
+        expect(err).to.not.exist;
+        expect(data.get()).to.eql({ num : 1, name : 'foo'});
+
+        return done();
+      });
+    });
+
+
+    it('should return error', function (done) {
+      table.docClient.updateItem.yields(new Error('fail'));
+
+      var attrs = {num: 1, name: 'foo'};
+      var item = new Item(attrs, table);
+
+      item.update(function (err, data) {
+        expect(err).to.exist;
+        expect(data).to.not.exist;
+
+        return done();
+      });
+
+    });
+
+    it('should return null', function (done) {
+      table.docClient.updateItem.yields(null, {});
+
+      var attrs = {num: 1, name: 'foo'};
+      var item = new Item(attrs, table);
+
+      item.update(function (err, data) {
+        expect(err).to.not.exist;
+        expect(data).to.not.exist;
+
+        return done();
+      });
+    });
+
   });
 });

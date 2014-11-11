@@ -1,20 +1,23 @@
 'use strict';
 
 var vogels = require('../index'),
-    AWS    = vogels.AWS;
+    AWS    = vogels.AWS,
+    Joi    = require('joi');
 
 AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
 
-var Account = vogels.define('Account', function (schema) {
-  schema.String('email', {hashKey: true});
-  schema.String('name');
-  schema.Number('age');
-  schema.Date('created', {default: Date.now});
-
-  schema.tableName = function () {
+var Account = vogels.define('example-tablename', {
+  hashKey : 'email',
+  timestamps : true,
+  schema : {
+    email : Joi.string(),
+    name : Joi.string(),
+    age : Joi.number()
+  },
+  tableName : function () {
     var d = new Date();
-    return ['accounts', d.getFullYear(), d.getMonth() + 1].join('_');
-  };
+    return ['example-dynamic-tablename', d.getFullYear(), d.getMonth() + 1].join('_');
+  }
 });
 
 var printAccountInfo = function (err, acc) {

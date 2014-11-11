@@ -3,191 +3,350 @@
 var Schema = require('../lib/schema'),
     chai   = require('chai'),
     expect = chai.expect,
+    Joi    = require('joi'),
+    _      = require('lodash'),
     sinon  = require('sinon');
 
 chai.should();
 
 describe('schema', function () {
-  var schema;
 
-  beforeEach(function () {
-    schema = new Schema();
+  describe('setup', function () {
+
+    it('should set hash key', function () {
+      var config = {
+        hashKey: 'id'
+      };
+
+      var s = new Schema(config);
+      s.hashKey.should.equal('id');
+    });
+
+    it('should set hash and range key', function () {
+      var config = {
+        hashKey : 'id',
+        rangeKey : 'date'
+      };
+
+      var s = new Schema(config);
+      s.hashKey.should.equal('id');
+      s.rangeKey.should.equal('date');
+    });
+
+    it('should set table name to string', function () {
+      var config = {
+        hashKey : 'id',
+        tableName : 'test-table'
+      };
+
+      var s = new Schema(config);
+      s.tableName.should.equal('test-table');
+    });
+
+    it('should set table name to function', function () {
+      var func = function () { return 'test-table'; };
+
+      var config = {
+        hashKey : 'id',
+        tableName : func
+      };
+
+      var s = new Schema(config);
+      s.tableName.should.equal(func);
+    });
+
+    it('should add timestamps to schema', function () {
+      var config = {
+        hashKey : 'id',
+        timestamps : true,
+        schema : {
+          id : Joi.string()
+        }
+      };
+
+      var s = new Schema(config);
+      s.timestamps.should.be.true;
+
+      expect(s._modelSchema.describe().children).to.have.keys(['id', 'createdAt', 'updatedAt']);
+
+      s._modelDatatypes.should.eql({
+        id  : 'S',
+        createdAt : 'DATE',
+        updatedAt : 'DATE',
+      });
+    });
+
+
+    it('should throw error when hash key is not present', function () {
+      var config = {rangeKey : 'foo'};
+
+      expect(function () {
+        new Schema(config);
+      }).to.throw(/hashKey is required/);
+
+    });
+
+    it('should setup local secondary index when both hash and range keys are given', function () {
+      var config = {
+        hashKey : 'foo',
+        indexes : [
+          {hashKey : 'foo', rangeKey : 'bar', type:'local', name : 'LocalBarIndex'}
+        ]
+      };
+
+      var s = new Schema(config);
+      s.secondaryIndexes.should.include.keys('LocalBarIndex');
+      s.globalIndexes.should.be.empty;
+    });
+
+    it('should setup local secondary index when only range key is given', function () {
+      var config = {
+        hashKey : 'foo',
+        indexes : [
+          {rangeKey : 'bar', type:'local', name : 'LocalBarIndex'}
+        ]
+      };
+
+      var s = new Schema(config);
+      s.secondaryIndexes.should.include.keys('LocalBarIndex');
+      s.globalIndexes.should.be.empty;
+    });
+
+    it('should throw when local index rangeKey isnt present', function () {
+      var config = {
+        hashKey : 'foo',
+        indexes : [
+          {hashKey : 'foo', type:'local', name : 'LocalBarIndex'}
+        ]
+      };
+
+      expect(function () {
+        new Schema(config);
+      }).to.throw(/rangeKey.*missing/);
+    });
+
+    it('should throw when local index hashKey does not match the tables hashKey', function () {
+      var config = {
+        hashKey : 'foo',
+        indexes : [
+          {hashKey : 'bar', rangeKey: 'date', type:'local', name : 'LocalDateIndex'}
+        ]
+      };
+
+      expect(function () {
+        new Schema(config);
+      }).to.throw(/hashKey must be one of context:hashKey/);
+    });
+
+    it('should setup global index', function () {
+      var config = {
+        hashKey : 'foo',
+        indexes : [
+          {hashKey : 'bar', type:'global', name : 'GlobalBarIndex'}
+        ]
+      };
+
+      var s = new Schema(config);
+      s.globalIndexes.should.include.keys('GlobalBarIndex');
+      s.secondaryIndexes.should.be.empty;
+    });
+
+    it('should throw when global index hashKey is not present', function () {
+      var config = {
+        hashKey : 'foo',
+        indexes : [
+          {rangeKey: 'date', type:'global', name : 'GlobalDateIndex'}
+        ]
+      };
+
+      expect(function () {
+        new Schema(config);
+      }).to.throw(/hashKey is required/);
+    });
+
+    it('should parse schema data types', function () {
+      var config = {
+        hashKey : 'foo',
+        schema : Joi.object().keys({
+          foo  : Joi.string().default('foobar'),
+          date : Joi.date().default(Date.now),
+          count: Joi.number(),
+          flag: Joi.boolean(),
+          nums : Joi.array().includes(Joi.number()).meta({dynamoType : 'NS'}),
+          items : Joi.array(),
+          data : Joi.object().keys({
+            stuff : Joi.array().meta({dynamoType : 'SS'}),
+            nested : {
+              first : Joi.string(),
+              last : Joi.string(),
+              nicks : Joi.array().meta({dynamoType : 'SS', foo : 'bar'}),
+              ages : Joi.array().meta({foo : 'bar'}).meta({dynamoType : 'NS'}),
+              pics : Joi.array().meta({dynamoType : 'BS'}),
+              bin : Joi.binary()
+            }
+          })
+        })
+      };
+
+      var s = new Schema(config);
+
+      s._modelSchema.should.eql(config.schema);
+      s._modelDatatypes.should.eql({
+        foo  : 'S',
+        date : 'DATE',
+        count : 'N',
+        flag : 'BOOL',
+        nums : 'NS',
+        items : 'L',
+        data : {
+          nested : {
+            ages  : 'NS',
+            first : 'S',
+            last  : 'S',
+            nicks : 'SS',
+            pics  : 'BS',
+            bin   : 'B'
+          },
+          stuff : 'SS'
+        }
+      });
+    });
+
   });
 
-  describe('#String', function () {
-
-    it('should do something', function () {
-      schema.String('name');
-
-      schema.attrs.should.have.keys(['name']);
-      schema.attrs.name.type._type.should.equal('string');
-    });
-
-    it('should set hashkey', function () {
-      schema.String('name', {hashKey: true});
-
-      schema.hashKey.should.equal('name');
-    });
-
-    it('should set rangeKey', function () {
-      schema.String('name', {rangeKey: true});
-
-      schema.rangeKey.should.equal('name');
-    });
-
-    it('should set secondaryIndexes', function () {
-      schema.String('name', {secondaryIndex: true});
-
-      schema.secondaryIndexes.should.eql(['name']);
-    });
-
-  });
-
-  describe('#Number', function () {
-    it('should set as number', function () {
-      schema.Number('age');
-
-      schema.attrs.should.have.keys(['age']);
-      schema.attrs.age.type._type.should.equal('number');
-    });
-  });
-
-  describe('#Boolean', function () {
-    it('should set as boolean', function () {
-      schema.Boolean('agree');
-
-      schema.attrs.should.have.keys(['agree']);
-      schema.attrs.agree.type._type.should.equal('boolean');
-    });
-  });
-
-  describe('#Date', function () {
-    it('should set as date', function () {
-      schema.Date('created');
-
-      schema.attrs.should.have.keys(['created']);
-      schema.attrs.created.type._type.should.equal('date');
-    });
-  });
-
-  describe('#StringSet', function () {
+  describe('#stringSet', function () {
     it('should set as string set', function () {
-      schema.StringSet('names');
+      var config = {
+        hashKey : 'email',
+        schema : {
+          email : Joi.string().email(),
+          names : Schema.types.stringSet()
+        }
+      };
 
-      schema.attrs.should.have.keys(['names']);
-      schema.attrs.names.type._type.should.equal('stringSet');
+      var s = new Schema(config);
+
+      s._modelDatatypes.should.eql({
+        email  : 'S',
+        names : 'SS',
+      });
     });
   });
 
-  describe('#NumberSet', function () {
+  describe('#numberSet', function () {
     it('should set as number set', function () {
-      schema.NumberSet('scores');
+      var config = {
+        hashKey : 'email',
+        schema : {
+          email : Joi.string().email(),
+          nums : Schema.types.numberSet()
+        }
+      };
 
-      schema.attrs.should.have.keys(['scores']);
-      schema.attrs.scores.type._type.should.equal('numberSet');
+      var s = new Schema(config);
+
+      s._modelDatatypes.should.eql({
+        email  : 'S',
+        nums : 'NS',
+      });
     });
   });
 
-  describe('#UUID', function () {
+  describe('#binarySet', function () {
+    it('should set as binary set', function () {
+      var config = {
+        hashKey : 'email',
+        schema : {
+          email : Joi.string().email(),
+          pics : Schema.types.binarySet()
+        }
+      };
+
+      var s = new Schema(config);
+
+      s._modelDatatypes.should.eql({
+        email  : 'S',
+        pics : 'BS',
+      });
+    });
+  });
+
+
+  describe('#uuid', function () {
     it('should set as uuid with default uuid function', function () {
-      schema.UUID('id');
+      var config = {
+        hashKey : 'id',
+        schema : {
+          id : Schema.types.uuid(),
+        }
+      };
 
-      schema.attrs.should.have.keys(['id']);
-      schema.attrs.id.options.default.should.exist;
-      schema.attrs.id.type._type.should.equal('uuid');
-    });
-
-    it('should set as uuid with default as given value', function () {
-      schema.UUID('id', {default : '123'});
-
-      schema.attrs.should.have.keys(['id']);
-      schema.attrs.id.options.default.should.equal('123');
-      schema.attrs.id.type._type.should.equal('uuid');
+      var s = new Schema(config);
+      expect(s.applyDefaults({}).id).should.not.be.empty;
     });
   });
 
-  describe('#TimeUUID', function () {
+  describe('#timeUUID', function () {
     it('should set as TimeUUID with default v1 uuid function', function () {
-      schema.TimeUUID('timeid');
+      var config = {
+        hashKey : 'id',
+        schema : {
+          id : Schema.types.timeUUID(),
+        }
+      };
 
-      schema.attrs.should.have.keys(['timeid']);
-      schema.attrs.timeid.options.default.should.exist;
-      schema.attrs.timeid.type._type.should.equal('timeuuid');
+      var s = new Schema(config);
+      expect(s.applyDefaults({}).id).should.not.be.empty;
+
     });
 
-    it('should set as uuid with default as given value', function () {
-      schema.TimeUUID('stamp', {default : '123'});
-
-      schema.attrs.should.have.keys(['stamp']);
-      schema.attrs.stamp.options.default.should.equal('123');
-      schema.attrs.stamp.type._type.should.equal('timeuuid');
-    });
   });
-
 
   describe('#validate', function () {
 
     it('should return no err for string', function() {
-      schema.String('email', {hashKey: true});
+      var config = {
+        hashKey : 'email',
+        schema : {
+          email : Joi.string().email().required()
+        }
+      };
 
-      expect(schema.validate({email: 'foo@bar.com'})).to.be.null;
-    });
+      var s = new Schema(config);
 
-    it('should return err when hashkey isnt set', function() {
-      schema.String('email', {hashKey: true});
-      schema.String('name');
-
-      var err = schema.validate({name : 'foo bar'});
-      expect(err).to.exist;
+      expect(s.validate({email: 'foo@bar.com'}).error).to.be.null;
     });
 
     it('should return no error for valid date object', function() {
-      schema.Date('created', {hashKey: true});
+      var config = {
+        hashKey : 'created',
+        schema : {
+          created : Joi.date()
+        }
+      };
 
-      expect(schema.validate({created: new Date()})).to.be.null;
+      var s = new Schema(config);
+
+      expect(s.validate({created: new Date()}).error).to.be.null;
+      expect(s.validate({created: Date.now()}).error).to.be.null;
     });
 
-    it('should return no error when using Date.now', function() {
-      schema.Date('created', {hashKey: true});
-
-      expect(schema.validate({created: Date.now()})).to.be.null;
-    });
-
-  });
-
-  describe('#defaults', function () {
-    it('should return default option set on hashkey', function () {
-      schema.String('email', {hashKey: true, default: 'foo@bar.com'});
-
-      schema.defaults().should.have.keys(['email']);
-    });
-
-    it('should return attributes that have defautls', function () {
-      schema.String('email', {hashKey: true});
-      schema.String('name', {default: 'Foo Bar'});
-      schema.Number('age', {default: 3});
-      schema.Number('posts', {default: 0});
-      schema.Boolean('terms', {default: false});
-
-      schema.defaults().should.have.keys(['name', 'age', 'posts', 'terms']);
-    });
-
-    it('should return empty object when no defaults exist', function () {
-      schema.String('email', {hashKey: true});
-      schema.String('name');
-      schema.Number('age');
-
-      schema.defaults().should.be.empty;
-    });
   });
 
   describe('#applyDefaults', function () {
     it('should apply default values', function () {
-      schema.String('email', {hashKey: true});
-      schema.String('name', {default: 'Foo Bar'});
-      schema.Number('age', {default: 3});
+      var config = {
+        hashKey : 'email',
+        schema : {
+          email : Joi.string(),
+          name  : Joi.string().default('Foo Bar').required(),
+          age   : Joi.number().default(3)
+        }
+      };
 
-      var d = schema.applyDefaults({email: 'foo@bar.com'});
+      var s = new Schema(config);
+
+      var d = s.applyDefaults({email: 'foo@bar.com'});
 
       d.email.should.equal('foo@bar.com');
       d.name.should.equal('Foo Bar');
@@ -197,53 +356,34 @@ describe('schema', function () {
     it('should return result of default functions', function () {
       var clock = sinon.useFakeTimers(Date.now());
 
-      schema.String('email', {hashKey: true});
-      schema.Date('created', {default: Date.now});
+      var config = {
+        hashKey : 'email',
+        schema : {
+          email   : Joi.string(),
+          created : Joi.date().default(Date.now),
+          data : {
+            name : Joi.string().default('Tim Tester'),
+            nick : Joi.string().default(_.constant('foo bar'))
+          }
+        }
+      };
 
-      var d = schema.applyDefaults({email: 'foo@bar.com'});
+      var s = new Schema(config);
 
-      d.created.should.equal(Date.now());
+      var d = s.applyDefaults({email: 'foo@bar.com', data : {} });
+
+      d.should.eql({
+        email : 'foo@bar.com',
+        created : Date.now(),
+        data : {
+          name : 'Tim Tester',
+          nick : 'foo bar'
+        }
+      });
 
       clock.restore();
     });
 
-    it('should modify passed in data', function () {
-      schema.String('email', {hashKey: true});
-      schema.String('name', {default: 'Foo Bar'});
-      schema.Number('age', {default: 3});
-
-      var data = {email : 'test@example.com'};
-      schema.applyDefaults(data);
-
-      data.email.should.equal('test@example.com');
-      data.name.should.equal('Foo Bar');
-      data.age.should.equal(3);
-    });
-
-    it('should modify anything when no defaults are set', function () {
-      schema.String('email');
-      schema.String('name');
-      schema.Number('age');
-
-      var d = schema.applyDefaults({email: 'foo@bar.com'});
-
-      d.email.should.equal('foo@bar.com');
-      expect(d.name).to.not.exist;
-      expect(d.age).to.not.exist;
-    });
   });
 
-  describe('#globalIndex', function () {
-
-    it('should set globalIndexes', function () {
-      schema.String('userId', {hashKey: true});
-      schema.String('gameTitle', {rangeKey: true});
-      schema.Number('topScore');
-
-      schema.globalIndex('GameTitleIndex', {hashKey: 'gameTitle', rangeKey : 'topScore'});
-
-      schema.globalIndexes.should.include.keys('GameTitleIndex');
-    });
-
-  });
 });

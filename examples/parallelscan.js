@@ -1,16 +1,22 @@
 'use strict';
 
 var vogels = require('../index'),
-    AWS    = vogels.AWS;
+    AWS    = vogels.AWS,
+    _      = require('lodash'),
+    Joi    = require('joi'),
+    async  = require('async');
 
 AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
 
-var Product = vogels.define('Product', function (schema) {
-  schema.String('id', {hashKey: true});
-  schema.Number('accountID');
-  schema.String('purchased');
-  schema.Date('ctime');
-  schema.Number('price');
+var Product = vogels.define('example-parallel-scan', {
+  hashKey : 'id',
+  timestamps : true,
+  schema : {
+    id        : vogels.types.uuid(),
+    accountId : Joi.number(),
+    purchased : Joi.boolean().default(false),
+    price     : Joi.number()
+  },
 });
 
 var printInfo = function (err, resp) {
@@ -30,9 +36,34 @@ var printInfo = function (err, resp) {
   console.log('Average purchased price', totalPrices / resp.Count);
 };
 
-var totalSegments = 8;
+var loadSeedData = function (callback) {
+  callback = callback || _.noop;
 
-Product.parallelScan(totalSegments)
-  .where('purchased').equals('true')
+  async.times(30, function(n, next) {
+    var purchased = n %4 === 0 ? true : false;
+    Product.create({accountId : n %5, purchased : purchased, price : n}, next);
+  }, callback);
+};
+
+var runParallelScan = function () {
+
+  var totalSegments = 8;
+
+  Product.parallelScan(totalSegments)
+  .where('purchased').equals(true)
   .attributes('price')
   .exec(printInfo);
+};
+
+async.series([
+  async.apply(vogels.createTables.bind(vogels)),
+  loadSeedData
+], function (err) {
+  if(err) {
+    console.log('error', err);
+    process.exit(1);
+  }
+
+  runParallelScan();
+});
+

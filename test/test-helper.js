@@ -1,22 +1,38 @@
 'use strict';
 
 var sinon = require('sinon'),
-    Table = require('../lib/table');
+    AWS   = require('aws-sdk'),
+    Table = require('../lib/table'),
+    DOC   = require('dynamodb-doc'),
+    _     = require('lodash');
 
 exports.mockDynamoDB = function () {
-  var dynamodb = {
-    scan        : sinon.stub(),
-    putItem     : sinon.stub(),
-    deleteItem  : sinon.stub(),
-    query       : sinon.stub(),
-    getItem     : sinon.stub(),
-    updateItem  : sinon.stub(),
-    createTable : sinon.stub(),
-    describeTable : sinon.stub(),
-    updateTable : sinon.stub()
-  };
+  var opts = { endpoint : 'http://dynamodb-local:8000', apiVersion: '2012-08-10' };
+  var db = new AWS.DynamoDB(opts);
 
-  return dynamodb;
+  db.scan          = sinon.stub();
+  db.putItem       = sinon.stub();
+  db.deleteItem    = sinon.stub();
+  db.query         = sinon.stub();
+  db.getItem       = sinon.stub();
+  db.updateItem    = sinon.stub();
+  db.createTable   = sinon.stub();
+  db.describeTable = sinon.stub();
+  db.updateTable   = sinon.stub();
+  db.deleteTable   = sinon.stub();
+  db.batchGetItem  = sinon.stub();
+  db.batchWriteItem = sinon.stub();
+
+  return db;
+};
+
+exports.realDynamoDB = function () {
+  var opts = { endpoint : 'http://dynamodb-local:8000', apiVersion: '2012-08-10' };
+  return new AWS.DynamoDB(opts);
+};
+
+exports.mockDocClient = function () {
+  return new DOC.DynamoDB(exports.mockDynamoDB());
 };
 
 exports.mockSerializer = function () {
@@ -41,4 +57,8 @@ exports.fakeUUID = function () {
   };
 
   return uuid;
+};
+
+exports.randomName = function (prefix) {
+  return prefix + '_' + Date.now() + '.' + _.random(1000);
 };

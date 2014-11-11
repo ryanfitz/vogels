@@ -1,16 +1,19 @@
 'use strict';
 
 var vogels = require('../index'),
-    AWS    = vogels.AWS;
+    AWS    = vogels.AWS,
+    Joi    = require('joi');
 
-AWS.config.loadFromPath(process.env.HOME + '/.ec2/vogels.json');
+AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
 
-var Account = vogels.define('Account', function (schema) {
-  schema.String('email', {hashKey: true});
-  schema.String('name');
-  schema.Number('age');
-  schema.Date('created', {default: Date.now});
-  schema.Date('updated');
+var Account = vogels.define('example-hook', {
+  hashKey : 'email',
+  timestamps : true,
+  schema : {
+    email : Joi.string().email(),
+    name  : Joi.string(),
+    age   : Joi.number(),
+  }
 });
 
 Account.before('create', function (data, next) {
@@ -22,12 +25,8 @@ Account.before('create', function (data, next) {
 });
 
 Account.before('update', function (data, next) {
-
-  setTimeout(function () {
-    data.updated = Date.now();
-    return next(null, data);
-  }, 1000);
-
+  data.age = 45;
+  return next(null, data);
 });
 
 Account.after('create', function (item) {
@@ -42,12 +41,19 @@ Account.after('destroy', function (item) {
   console.log('Account destroyed', item.get());
 });
 
-Account.create({email: 'test11@example.com'}, function (err, acc) {
-  acc.set({age: 25});
+vogels.createTables(function (err) {
+  if(err) {
+    console.log('Error creating tables', err);
+    process.exit(1);
+  }
 
-  acc.update(function () {
-    acc.destroy({ReturnValues: 'ALL_OLD'});
+  Account.create({email: 'test11@example.com'}, function (err, acc) {
+    acc.set({age: 25});
+
+    acc.update(function () {
+      acc.destroy({ReturnValues: 'ALL_OLD'});
+    });
+
   });
 
 });
-

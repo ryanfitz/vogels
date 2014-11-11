@@ -1,48 +1,35 @@
 'use strict';
 
 var vogels = require('../index'),
-    _     = require('lodash'),
-    AWS    = vogels.AWS;
+    _      = require('lodash'),
+    util   = require('util'),
+    AWS    = vogels.AWS,
+    Joi    = require('joi'),
+    async  = require('async');
 
 AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
 
 // http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html
 
-var GameScore = vogels.define('GameScore', function (schema) {
-  schema.String('userId', {hashKey: true});
-  schema.String('gameTitle', {rangeKey: true});
-  schema.Number('topScore');
-  schema.Date('topScoreDateTime');
-  schema.Number('wins');
-  schema.Number('losses');
-
-  schema.globalIndex('GameTitleIndex', {
-    hashKey: 'gameTitle',
-    rangeKey: 'topScore',
-    Projection: { NonKeyAttributes: [ 'wins' ], ProjectionType: 'INCLUDE' } //optional, defaults to ALL
-  });
+var GameScore = vogels.define('example-global-index', {
+  hashKey : 'userId',
+  rangeKey : 'gameTitle',
+  schema : {
+    userId           : Joi.string(),
+    gameTitle        : Joi.string(),
+    topScore         : Joi.number(),
+    topScoreDateTime : Joi.date(),
+    wins             : Joi.number(),
+    losses           : Joi.number()
+  },
+  indexes : [{
+    hashKey : 'gameTitle',
+    rangeKey : 'topScore',
+    name : 'GameTitleIndex',
+    type : 'global',
+    projection: { NonKeyAttributes: [ 'wins' ], ProjectionType: 'INCLUDE' }
+  }]
 });
-
-//GameScore.createTable(function (err, result) {
-  //if(err) {
-    //console.log('error creating table', err);
-  //} else  {
-
-    //console.log(err, result);
-
-    //GameScore.describeTable(function (err, result) {
-      //console.log('table info', result);
-    //});
-  //}
-//});
-
-var createGameScoreRecord = function (attrs) {
-  GameScore.create(attrs, function (err) {
-    if(err) {
-      console.log('error creating game score record', err);
-    }
-  });
-};
 
 var data = [
   {userId: '101', gameTitle : 'Galaxy Invaders', topScore: 5842, wins: 10, losses: 5 , topScoreDateTime: new Date(2012, 1, 3, 8, 30)},
@@ -58,10 +45,25 @@ var data = [
   {userId: '103', gameTitle : 'Starship X', topScore: 42, wins: 4, losses: 19 },
 ];
 
-_.each(data, createGameScoreRecord);
+var loadSeedData = function (callback) {
+  callback = callback || _.noop;
 
-// Perform query against global secondary index
-GameScore
+  async.each(data, function(attrs, callback) {
+    GameScore.create(attrs,callback);
+  }, callback);
+};
+
+async.series([
+  async.apply(vogels.createTables.bind(vogels)),
+  loadSeedData
+], function (err) {
+  if(err) {
+    console.log('error', err);
+    process.exit(1);
+  }
+
+  // Perform query against global secondary index
+  GameScore
   .query('Galaxy Invaders')
   .usingIndex('GameTitleIndex')
   .where('topScore').gt(0)
@@ -70,7 +72,8 @@ GameScore
     if(err){
       console.log(err);
     } else {
-      console.log(_.map(data.Items, JSON.stringify));
+      console.log('Found', data.Count, 'items');
+      console.log(util.inspect(_.pluck(data.Items, 'attrs')));
     }
   });
-
+});
