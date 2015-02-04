@@ -9,7 +9,6 @@ var helper = require('./test-helper'),
     chai   = require('chai'),
     expect = chai.expect,
     assert = require('assert'),
-    sinon  = require('sinon'),
     Joi    = require('joi');
 
 chai.should();
@@ -101,8 +100,6 @@ describe('Query', function () {
     });
 
     it('should stream data after handling retryable error', function (done) {
-      var clock = sinon.useFakeTimers();
-
       var config = {
         hashKey: 'name',
         rangeKey: 'email',
@@ -127,19 +124,20 @@ describe('Query', function () {
 
       var called = false;
 
-     stream.on('readable', function () {
+      stream.on('readable', function () {
         called = true;
-        expect(stream.read().Items).to.have.length.above(0);
+
+        var data = stream.read();
+        if(data) {
+          expect(data.Items).to.have.length.above(0);
+        }
       });
 
       stream.on('end', function () {
         expect(called).to.be.true;
-
-        clock.restore();
         return done();
       });
 
-      clock.tick(2000);
     });
   });
 

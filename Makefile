@@ -34,6 +34,13 @@ coverage: lint
 	@node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha $(TESTSRC)
 	@node_modules/.bin/istanbul check-coverage --statements 100 --functions 100 --branches 100 --lines 100
 
+test-io: lint
+	@node node_modules/.bin/mocha \
+		--reporter $(REPORTER) \
+		--ui bdd \
+		--grep "stream data after handling retryable error" \
+		test/*-test.js
+
 test: test-unit test-integration
 
 .PHONY: test test-cov test-cov-html

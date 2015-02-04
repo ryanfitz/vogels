@@ -1,6 +1,7 @@
 'use strict';
 
 var vogels = require('../index'),
+    DOC    = require('dynamodb-doc'),
     helper = require('./test-helper'),
     Table  = require('../lib/table'),
     chai   = require('chai'),
@@ -107,6 +108,17 @@ describe('vogels', function () {
 
       Account.docClient.should.eq(dynamodb);
     });
+
+    it('should set document client', function () {
+      var Account = vogels.define('Account', {hashKey : 'id'});
+
+      var docClient = new DOC.DynamoDB(helper.realDynamoDB());
+
+      Account.config({docClient: docClient });
+
+      Account.docClient.should.eq(docClient);
+    });
+
 
     it('should globally set dynamodb driver for all models', function () {
       var Account = vogels.define('Account', {hashKey : 'id'});

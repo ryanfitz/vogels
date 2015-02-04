@@ -555,7 +555,10 @@ describe('Vogels Integration Tests', function() {
       var called = false;
       stream.on('readable', function () {
         called = true;
-        expect(stream.read().Items).to.have.length.above(0);
+        var data = stream.read();
+        if(data) {
+          expect(data.Items).to.have.length.above(0);
+        }
       });
 
       stream.on('end', function () {
@@ -613,8 +616,11 @@ describe('Vogels Integration Tests', function() {
       var called = false;
       stream.on('readable', function () {
         called = true;
-        var items = stream.read().Items;
-        expect(items).to.have.length.within(0, 2);
+        var data = stream.read();
+
+        if(data) {
+          expect(data.Items).to.have.length.within(0, 2);
+        }
       });
 
       stream.on('end', function () {
@@ -657,7 +663,11 @@ describe('Vogels Integration Tests', function() {
       var called = false;
       stream.on('readable', function () {
         called = true;
-        expect(stream.read().Items).to.have.length.above(0);
+        var data = stream.read();
+
+        if(data) {
+          expect(data.Items).to.have.length.above(0);
+        }
       });
 
       stream.on('end', function () {
