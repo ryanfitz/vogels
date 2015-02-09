@@ -22,7 +22,7 @@
   "dependencies": {
     "aws-sdk": "2.1.x",
     "dynamodb-doc": "awslabs/dynamodb-document-js-sdk",
-    "lodash": "2.4.x",
+    "lodash": "3.1.x",
     "joi": "5.x.x",
     "node-uuid": "1.4.x",
     "async": "0.9.x"
