@@ -2,15 +2,18 @@
 
 var vogels = require('../index'),
     fs     = require('fs'),
-    AWS    = vogels.AWS;
+    AWS    = vogels.AWS,
+    Joi    = require('joi');
 
 AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
 
-var File = vogels.define('File', function (schema) {
-  schema.String('name', {hashKey: true});
-  schema.Binary('data');
-
-  schema.Date('created', {default: Date.now});
+var BinModel = vogels.define('example-binary', {
+  hashKey : 'name',
+  timestamps : true,
+  schema : {
+    name : Joi.string(),
+    data : Joi.binary()
+  }
 });
 
 var printFileInfo = function (err, file) {
@@ -23,10 +26,18 @@ var printFileInfo = function (err, file) {
   }
 };
 
-fs.readFile(__dirname + '/basic.js', function (err, data) {
-  if (err)  {
-    throw err;
+vogels.createTables(function (err) {
+  if(err) {
+    console.log('Error creating tables', err);
+    process.exit(1);
   }
 
-  File.create({name : 'basic.js', data: data}, printFileInfo);
+  fs.readFile(__dirname + '/basic.js', function (err, data) {
+    if (err)  {
+      throw err;
+    }
+
+    BinModel.create({name : 'basic.js', data: data}, printFileInfo);
+
+  });
 });

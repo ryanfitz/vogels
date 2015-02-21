@@ -1,15 +1,19 @@
 'use strict';
 
 var vogels = require('../index'),
+    Joi    = require('joi'),
     AWS    = vogels.AWS;
 
 AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
 
-var Account = vogels.define('Account', function (schema) {
-  schema.String('email', {hashKey: true});
-  schema.String('name');
-  schema.Number('age');
-  schema.Date('created', {default: Date.now});
+var Account = vogels.define('example-model-methods-Account', {
+  hashKey : 'email',
+  timestamps : true,
+  schema : {
+    email : Joi.string(),
+    name : Joi.string(),
+    age : Joi.number(),
+  }
 });
 
 Account.prototype.sayHello = function () {

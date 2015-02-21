@@ -1,11 +1,11 @@
 {
   "name": "vogels",
-  "version": "0.12.0",
+  "version": "2.0.0-rc8",
   "author": "Ryan Fitzgerald <ryan@codebrewstudios.com>",
   "description": "DynamoDB data mapper",
   "main": "index.js",
   "scripts": {
-    "test": "grunt test"
+    "test": "make test"
   },
   "repository": "git://github.com/ryanfitz/vogels.git",
   "keywords": [
@@ -16,25 +16,24 @@
     "nosql"
   ],
   "engines": {
-    "node": ">=0.10.22"
+    "node": ">=0.10.30"
   },
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "2.0.19",
-    "lodash": "2.4.x",
-    "joi": "2.9.x",
+    "aws-sdk": "2.1.x",
+    "dynamodb-doc": "awslabs/dynamodb-document-js-sdk",
+    "lodash": "3.1.x",
+    "joi": "5.x.x",
     "node-uuid": "1.4.x",
-    "async": "0.9.x",
-    "readable-stream": "~1.0.26-2"
+    "async": "0.9.x"
   },
   "devDependencies": {
     "chai": "1.x.x",
-    "grunt": "0.4.x",
-    "grunt-cli": "0.1.x",
-    "grunt-contrib-jshint": "0.10.x",
-    "grunt-contrib-watch": "0.6.x",
-    "grunt-simple-mocha": "0.4.x",
-    "mocha": "1.x.x",
-    "sinon": "1.9.x"
+    "istanbul": "^0.3.5",
+    "jscoverage": "^0.5.9",
+    "jshint": "2.x.x",
+    "jshint-stylish": "^1.0.0",
+    "mocha": "2.x.x",
+    "sinon": "1.12.x"
   }
 }

@@ -34,22 +34,37 @@ vogels.AWS.config.update({accessKeyId: 'AKID', secretAccessKey: 'SECRET'});
 Models are defined through the toplevel define method.
 
 ```js
-var Account = vogels.define('Account', function (schema) {
-  schema.String('email', {hashKey: true});
-  schema.String('name').required(); // name attribute is required
-  schema.Number('age'); // age is optional
-  schema.Date('created', {default: Date.now});
+var Account = vogels.define('Account', {
+  hashKey : 'email',
+
+  // add the timestamp attributes (updatedAt, createdAt)
+  timestamps : true,
+
+  schema : {
+    email   : Joi.string().email(),
+    name    : Joi.string(),
+    age     : Joi.number(),
+    roles   : vogels.types.stringSet(),
+    settings : {
+      nickname      : Joi.string(),
+      acceptedTerms : Joi.boolean().default(false)
+    }
+  }
 });
 ```
 
 Models can also be defined with hash and range keys.
 
 ```js
-var BlogPost = vogels.define('Account', function (schema) {
-  schema.String('email', {hashKey: true});
-  schema.String('title', {rangeKey: true});
-  schema.String('content');
-  schema.StringSet('tags');
+var BlogPost = vogels.define('BlogPost', {
+  hashKey : 'email',
+  rangeKey : ‘title’,
+  schema : {
+    email   : Joi.string().email(),
+    title   : Joi.string(),
+    content : Joi.binary(),
+    tags   : vogels.types.stringSet(),
+  }
 });
 ```
 
@@ -71,10 +86,13 @@ Default, the uuid will be automatically generated when attempting to create
 the model in DynamoDB.
 
 ```js
-var Tweet = vogels.define('Account', function (schema) {
-  schema.UUID('TweetID', {hashKey: true});
-  schema.String('content');
-  schema.Date('created', {default: Date.now});
+var Tweet = vogels.define('Tweet', {
+  hashKey : 'TweetID',
+  timestamps : true,
+  schema : {
+    TweetID : vogels.types.uuid(),
+    content : Joi.string(),
+  }
 });
 ```
 
@@ -126,6 +144,17 @@ BlogPost.create({
   }, function (err, post) {
     console.log('created blog post', post.get('title'));
   });
+```
+
+Use expressions api to do conditional writes
+
+```js
+  var params = {};
+  params.ConditionExpression = '#i <> :x';
+  params.ExpressionAttributeNames = {'#i' : 'id'};
+  params.ExpressionAttributeValues = {':x' : 123};
+
+  User.create({id : 123, name : 'Kurt Warner' }, params, function (error, acc) {
 ```
 
 ### Updating
@@ -203,6 +232,29 @@ BlogPost.update({
 });
 ```
 
+Use the expressions api to update nested documents
+
+```js
+var params = {};
+  params.UpdateExpression = 'SET #year = #year + :inc, #dir.titles = list_append(#dir.titles, :title), #act[0].firstName = :firstName ADD tags :tag';
+  params.ConditionExpression = '#year = :current';
+  params.ExpressionAttributeNames = {
+    '#year' : 'releaseYear',
+    '#dir' : 'director',
+    '#act' : 'actors'
+  };
+
+  params.ExpressionAttributeValues = {
+    ':inc' : 1,
+    ':current' : 2001,
+    ':title' : ['The Man'],
+    ':firstName' : 'Rob',
+    ':tag' : vogels.Set(['Sports', 'Horror'], 'S')
+  };
+
+Movie.update({title : 'Movie 0', description : 'This is a description'}, params, function (err, mov) {});
+```
+
 ### Deleting
 You delete items in DynamoDB using the hashkey of model
 If your model uses both a hash and range key, than both need to be provided
@@ -232,6 +284,18 @@ Account.destroy('foo@example.com', {ReturnValues: true}, function (err, acc) {
 
 Account.destroy('foo@example.com', {expected: {age: 22}}, function (err) {
   console.log('account deleted if the age was 22');
+```
+
+
+Use expression apis to perform conditional deletes
+
+```js
+var params = {};
+params.ConditionExpression = '#v = :x';
+params.ExpressionAttributeNames = {'#v' : 'version'};
+params.ExpressionAttributeValues = {':x' : '2'};
+
+User.destroy({id : 123}, params, function (err, acc) {});
 ```
 
 ### Loading models from DynamoDB
@@ -280,6 +344,13 @@ BlogPost.get({email: 'werner@example.com', title: 'Expanding the Cloud'}, functi
   console.log('loded post', post.get('content'));
 });
 ```
+
+Use expressions api to select which attributes you want returned
+
+```js
+  User.get({ id : '123456789'},{ ProjectionExpression : 'email, age, settings.nickname' }, function (err, acc) {});
+```
+
 ### Query
 For models that use hash and range keys Vogels provides a flexible and
 chainable query api
@@ -387,7 +458,7 @@ BlogPost
 
 BlogPost
   .query('werner@example.com')
-  .where('title').between(['foo@example.com', 'test@example.com'])
+  .where('title').between('foo@example.com', 'test@example.com')
   .exec();
 ```
 
@@ -401,21 +472,38 @@ BlogPost
   .exec();
 ```
 
+Expression Filters also allow you to further filter results on non-key attributes.
+
+```javascript
+BlogPost
+  .query('werner@example.com')
+  .filterExpression('#title < :t')
+  .expressionAttributeValues({ ':t' : 'Expanding' })
+  .expressionAttributeNames({ '#title' : 'title'})
+  .projectionExpression('#title, tag')
+  .exec();
+```
+
 See the queryFilter.js [example][0] for more examples of using query filters
 
 #### Global Indexes
 First, define a model with a global secondary index.
 
 ```js
-var GameScore = vogels.define('GameScore', function (schema) {
-  schema.String('userId', {hashKey: true});
-  schema.String('gameTitle', {rangeKey: true});
-  schema.Number('topScore');
-  schema.Date('topScoreDateTime');
-  schema.Number('wins');
-  schema.Number('losses');
-
-  schema.globalIndex('GameTitleIndex', { hashKey: 'gameTitle', rangeKey: 'topScore'});
+var GameScore = vogels.define('GameScore', {
+  hashKey : 'userId',
+  rangeKey : 'gameTitle',
+  schema : {
+    userId           : Joi.string(),
+    gameTitle        : Joi.string(),
+    topScore         : Joi.number(),
+    topScoreDateTime : Joi.date(),
+    wins             : Joi.number(),
+    losses           : Joi.number()
+  },
+  indexes : [{
+    hashKey : 'gameTitle', rangeKey : 'topScore', name : 'GameTitleIndex', type : 'global'
+  }]
 });
 ```
 
@@ -434,19 +522,25 @@ By default all attributes will be projected when no Projection pramater is
 present 
 
 ```js
-var GameScore = vogels.define('GameScore', function (schema) {
-  schema.String('userId', {hashKey: true});
-  schema.String('gameTitle', {rangeKey: true});
-  schema.Number('topScore');
-  schema.Date('topScoreDateTime');
-  schema.Number('wins');
-  schema.Number('losses');
+var GameScore = vogels.define('GameScore', {
+  hashKey : 'userId',
+  rangeKey : 'gameTitle',
+  schema : {
+    userId           : Joi.string(),
+    gameTitle        : Joi.string(),
+    topScore         : Joi.number(),
+    topScoreDateTime : Joi.date(),
+    wins             : Joi.number(),
+    losses           : Joi.number()
+  },
+  indexes : [{
+    hashKey : 'gameTitle',
+    rangeKey : 'topScore',
+    name : 'GameTitleIndex',
+    type : 'global',
+    projection: { NonKeyAttributes: [ 'wins' ], ProjectionType: 'INCLUDE' } //optional, defaults to ALL
 
-  schema.globalIndex('GameTitleIndex', {
-    hashKey: 'gameTitle',
-    rangeKey: 'topScore',
-    Projection: { NonKeyAttributes: [ 'wins' ], ProjectionType: 'INCLUDE' } //optional, defaults to ALL
-  });
+  }]
 });
 ```
 
@@ -467,12 +561,19 @@ GameScore
 First, define a model using a local secondary index
 
 ```js
-var BlogPost = vogels.define('Account', function (schema) {
-  schema.String('email', {hashKey: true});
-  schema.String('title', {rangeKey: true});
-  schema.String('content');
+var BlogPost = vogels.define('Account', {
+  hashkey : 'email',
+  rangekey : 'title',
+  schema : {
+    email             : Joi.string().email(),
+    title             : Joi.string(),
+    content           : Joi.binary(),
+    PublishedDateTime : Joi.date()
+  },
 
-  schema.Date('PublishedDateTime', {secondaryIndex: true});
+  indexes : [{
+    hashkey : 'email', rangekey : 'PublishedDateTime', type : 'local', name : 'PublishedIndex'
+  }]
 });
 ```
 
@@ -481,7 +582,7 @@ Now we can query for blog posts using the secondary index
 ```js
 BlogPost
   .query('werner@example.com')
-  .usingIndex('PublishedDateTimeIndex')
+  .usingIndex('PublishedIndex')
   .descending()
   .exec(callback);
 ```
@@ -491,7 +592,7 @@ Could also query for published posts, but this time return oldest first
 ```js
 BlogPost
   .query('werner@example.com')
-  .usingIndex('PublishedDateTimeIndex')
+  .usingIndex('PublishedIndex')
   .ascending()
   .exec(callback);
 ```
@@ -500,7 +601,7 @@ Finally lets load all published posts sorted by publish date
 ```js
 BlogPost
   .query('werner@example.com')
-  .usingIndex('PublishedDateTimeIndex')
+  .usingIndex('PublishedIndex')
   .descending()
   .loadAll()
   .exec(callback);
@@ -640,7 +741,7 @@ Account
 // between
 Account
   .scan()
-  .where('name').between(['Bar', 'Foo'])
+  .where('name').between('Bar', 'Foo')
   .exec();
 
 // multiple filters
@@ -648,6 +749,17 @@ Account
   .scan()
   .where('name').equals('Werner')
   .where('age').notNull()
+  .exec();
+```
+
+You can also use the new expressions api when filtering scans
+
+```javascript
+User.scan()
+  .filterExpression('#age BETWEEN :low AND :high AND begins_with(#email, :e)')
+  .expressionAttributeValues({ ':low' : 18, ':high' : 22, ':e' : 'test1'})
+  .expressionAttributeNames({ '#age' : 'age', '#email' : 'email'})
+  .projectionExpression('#age, #email')
   .exec();
 ```
 
@@ -734,15 +846,18 @@ querystream.on('end', function () {
 vogels supports dynamic table names, useful for storing time series data.
 
 ```js
-var Event = vogels.define('Event', function (schema) {
-  schema.String('name', {hashKey: true});
-  schema.Number('total');
+var Event = vogels.define('Event', {
+  hashkey : 'name',
+  schema : {
+    name : Joi.string(),
+    total : Joi.number()
+  },
 
   // store monthly event data
-  schema.tableName = function () {
+  tableName: function () {
     var d = new Date();
     return ['events', d.getFullYear(), d.getMonth() + 1].join('_');
-  };
+  }
 });
 ```
 
@@ -751,11 +866,17 @@ var Event = vogels.define('Event', function (schema) {
 ```js
 var vogels = require('vogels');
 
-var Account = vogels.define('Account', function (schema) {
-  schema.String('email', {hashKey: true});
-  schema.String('name').required();
-  schema.Number('age');
-  schema.Date('created', {default: Date.now});
+var Account = vogels.define('Account', {
+  hashKey : 'email',
+
+  // add the timestamp attributes (updatedAt, createdAt)
+  timestamps : true,
+
+  schema : {
+    email   : Joi.string().email(),
+    name    : Joi.string().required(),
+    age     : Joi.number(),
+  }
 });
 
 Account.create({email: 'test@example.com', name : 'Test Account'}, function (err, acc) {
@@ -776,14 +897,12 @@ See the [examples][0] for more working sample code.
 
 * Batch Write Items
 * Streaming api support for all operations
-* DDL operations (update throughput)
-* Full intergration test suite
 
 ### License
 
 (The MIT License)
 
-Copyright (c) 2014 Ryan Fitzgerald
+Copyright (c) 2015 Ryan Fitzgerald
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

@@ -1,0 +1,16 @@
+
+lib:
+  build: .
+  command: make
+  volumes:
+    - .:/usr/src/app
+
+  links:
+    - db:dynamodb-local
+  environment:
+    AWS_ACCESS_KEY_ID: AKID
+    AWS_SECRET_ACCESS_KEY: SECRET
+    AWS_REGION: us-east-1
+db:
+  image: fitz/dynamodb-local
+  command: -inMemory

@@ -1,18 +1,28 @@
 'use strict';
 
 var vogels = require('../index'),
-    util  = require('util'),
-    _     = require('lodash'),
+    util   = require('util'),
+    _      = require('lodash'),
+    Joi    = require('joi'),
+    async  = require('async'),
     AWS    = vogels.AWS;
 
 AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
 
-var Account = vogels.define('ExampleAccount', function (schema) {
-  schema.String('name', {hashKey: true});
-  schema.String('email', {rangeKey: true});
-  schema.Date('created', {secondaryIndex: true});
-  schema.Number('age');
-  schema.StringSet('roles');
+var Account = vogels.define('example-query-filter', {
+  hashKey : 'name',
+  rangeKey : 'email',
+  timestamps : true,
+  schema : {
+    name  : Joi.string(),
+    email : Joi.string().email(),
+    age   : Joi.number(),
+    roles : vogels.types.stringSet(),
+  },
+
+  indexes : [
+    {hashKey : 'name', rangeKey : 'createdAt', type : 'local', name : 'CreatedAtIndex'}
+  ]
 });
 
 var printResults = function (msg) {
@@ -20,7 +30,7 @@ var printResults = function (msg) {
 
     console.log('----------------------------------------------------------------------');
     if(err) {
-      console.log('Error running query', err);
+      console.log(msg + ' - Error running query', err);
     } else {
       console.log(msg + ' - Found', resp.Count, 'items');
       console.log(util.inspect(_.pluck(resp.Items, 'attrs')));
@@ -35,11 +45,13 @@ var printResults = function (msg) {
   };
 };
 
-var loadSeedData = function () {
-  _.times(30, function(n) {
+var loadSeedData = function (callback) {
+  callback = callback || _.noop;
+
+  async.times(30, function(n, next) {
     var roles = n %3 === 0 ? ['admin', 'editor'] : ['user'];
-    Account.create({email: 'test' + n + '@example.com', name : 'Test ' + n %3, age: n, roles : roles}, _.noop);
-  });
+    Account.create({email: 'test' + n + '@example.com', name : 'Test ' + n %3, age: n, roles : roles}, next);
+  }, callback);
 };
 
 var runFilterQueries = function () {
@@ -49,7 +61,7 @@ var runFilterQueries = function () {
 
 
   // between filter
-  Account.query('Test 1').filter('age').between([5, 10]).exec(printResults('Between Filter'));
+  Account.query('Test 1').filter('age').between(5, 10).exec(printResults('Between Filter'));
 
   // IN filter
   Account.query('Test 1').filter('age').in([5, 10]).exec(printResults('IN Filter'));
@@ -65,13 +77,14 @@ var runFilterQueries = function () {
   Account.query('Test 1').filter('roles').notContains('admin').exec(printResults('NOT contains admin Filter'));
 };
 
-vogels.createTables(function (err) {
+async.series([
+  async.apply(vogels.createTables.bind(vogels)),
+  loadSeedData
+], function (err) {
   if(err) {
-    console.log('Error creating tables', err);
-    process.exit();
-  } else {
-    console.log('table are now created and active');
-    loadSeedData();
-    runFilterQueries();
+    console.log('error', err);
+    process.exit(1);
   }
+
+  runFilterQueries();
 });

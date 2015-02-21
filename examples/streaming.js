@@ -1,17 +1,20 @@
 'use strict';
 
 var vogels = require('../index'),
+    Joi    = require('joi'),
     AWS    = vogels.AWS;
 
 AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
 
-var Product = vogels.define('Product', function (schema) {
-  schema.String('ProductId', {hashKey: true});
-  schema.String('host');
-  schema.String('url');
-  schema.String('title');
-
-  schema.Date('created');
+var Product = vogels.define('example-streaming-Product', {
+  hashKey : 'ProductId',
+  timestamps : true,
+  schema : {
+    ProductId : Joi.string(),
+    host      : Joi.string(),
+    url       : Joi.string(),
+    title     : Joi.string()
+  }
 });
 
 var printStream = function (msg, stream) {
