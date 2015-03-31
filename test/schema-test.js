@@ -76,6 +76,92 @@ describe('schema', function () {
       });
     });
 
+    it('should add timestamps with custom names to schema', function () {
+      var config = {
+        hashKey : 'id',
+        timestamps : true,
+        createdAt : 'created',
+        updatedAt : 'updated',
+        schema : {
+          id : Joi.string()
+        }
+      };
+
+      var s = new Schema(config);
+      s.timestamps.should.be.true;
+
+      expect(s._modelSchema.describe().children).to.have.keys(['id', 'created', 'updated']);
+
+      s._modelDatatypes.should.eql({
+        id  : 'S',
+        created : 'DATE',
+        updated : 'DATE',
+      });
+    });
+
+    it('should only add createdAt timestamp ', function () {
+      var config = {
+        hashKey : 'id',
+        timestamps : true,
+        updatedAt : false,
+        schema : {
+          id : Joi.string()
+        }
+      };
+
+      var s = new Schema(config);
+      s.timestamps.should.be.true;
+
+      expect(s._modelSchema.describe().children).to.have.keys(['id', 'createdAt']);
+
+      s._modelDatatypes.should.eql({
+        id  : 'S',
+        createdAt : 'DATE'
+      });
+    });
+
+    it('should only add updatedAt timestamp ', function () {
+      var config = {
+        hashKey : 'id',
+        timestamps : true,
+        createdAt : false,
+        schema : {
+          id : Joi.string()
+        }
+      };
+
+      var s = new Schema(config);
+      s.timestamps.should.be.true;
+
+      expect(s._modelSchema.describe().children).to.have.keys(['id', 'updatedAt']);
+
+      s._modelDatatypes.should.eql({
+        id  : 'S',
+        updatedAt : 'DATE'
+      });
+    });
+
+    it('should only add custom created timestamp ', function () {
+      var config = {
+        hashKey : 'id',
+        timestamps : true,
+        createdAt : 'fooCreate',
+        updatedAt : false,
+        schema : {
+          id : Joi.string()
+        }
+      };
+
+      var s = new Schema(config);
+      s.timestamps.should.be.true;
+
+      expect(s._modelSchema.describe().children).to.have.keys(['id', 'fooCreate']);
+
+      s._modelDatatypes.should.eql({
+        id  : 'S',
+        fooCreate : 'DATE'
+      });
+    });
 
     it('should throw error when hash key is not present', function () {
       var config = {rangeKey : 'foo'};
