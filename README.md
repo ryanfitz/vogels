@@ -97,6 +97,77 @@ var Tweet = vogels.define('Tweet', {
 ```
 
 ### Configuration
+You can configure vogels to automatically add `createdAt` and `updatedAt` timestamp attributes when
+saving and updating a model. `updatedAt` will only be set when updating a record and will not be set on initial creation of the model.
+
+```js
+var Account = vogels.define('Account', {
+  hashKey : 'email',
+
+  // add the timestamp attributes (updatedAt, createdAt)
+  timestamps : true,
+
+  schema : {
+    email : Joi.string().email(),
+  }
+});
+```
+
+If you want vogels to handle timestamps, but only want some of them, or want your
+timestamps to be called something else, you can override each attribute individually:
+
+```js
+var Account = vogels.define('Account', {
+  hashKey : 'email',
+
+  // enable timestamps support
+  timestamps : true,
+
+  // I don't want createdAt
+  createdAt: false,
+
+  // I want updatedAt to actually be called updateTimestamp
+  updatedAt: 'updateTimestamp'
+
+  schema : {
+    email : Joi.string().email(),
+  }
+});
+```
+
+You can override the table name the model will use.
+
+```js
+var Event = vogels.define('Event', {
+  hashkey : 'name',
+  schema : {
+    name : Joi.string(),
+    total : Joi.number()
+  },
+
+  tableName: 'deviceEvents'
+});
+```
+
+if you set the tableName to a function, vogels will use the result of the function as the active table to use.
+Useful for storing time series data.
+
+```js
+var Event = vogels.define('Event', {
+  hashkey : 'name',
+  schema : {
+    name : Joi.string(),
+    total : Joi.number()
+  },
+
+  // store monthly event data
+  tableName: function () {
+    var d = new Date();
+    return ['events', d.getFullYear(), d.getMonth() + 1].join('_');
+  }
+});
+```
+
 After you've defined your model you can configure the table name to use.
 By default, the table name used will be the lowercased and pluralized version
 of the name you provided when defining the model.

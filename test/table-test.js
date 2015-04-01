@@ -363,6 +363,74 @@ describe('table', function () {
       });
     });
 
+    it('should create item with custom createdAt attribute name', function (done) {
+      var config = {
+        hashKey: 'email',
+        timestamps : true,
+        createdAt : 'created',
+        schema : {
+          email : Joi.string(),
+        }
+      };
+
+      var s = new Schema(config);
+
+      table = new Table('accounts', s, realSerializer, docClient);
+
+      var request = {
+        TableName: 'accounts',
+        Item : {
+          email : 'test@test.com',
+          created : sinon.match.string
+        }
+      };
+
+      docClient.putItem.withArgs(request).yields(null, {});
+
+      table.create({email : 'test@test.com'}, function (err, account) {
+        expect(err).to.not.exist;
+        account.should.be.instanceof(Item);
+
+        account.get('email').should.equal('test@test.com');
+        account.get('created').should.exist;
+        done();
+      });
+    });
+
+
+    it('should create item without createdAt param', function (done) {
+      var config = {
+        hashKey: 'email',
+        timestamps : true,
+        createdAt : false,
+        schema : {
+          email : Joi.string(),
+        }
+      };
+
+      var s = new Schema(config);
+
+      table = new Table('accounts', s, realSerializer, docClient);
+
+      var request = {
+        TableName: 'accounts',
+        Item : {
+          email : 'test@test.com'
+        }
+      };
+
+      docClient.putItem.withArgs(request).yields(null, {});
+
+      table.create({email : 'test@test.com'}, function (err, account) {
+        expect(err).to.not.exist;
+        account.should.be.instanceof(Item);
+
+        account.get('email').should.equal('test@test.com');
+        expect(account.get('createdAt')).to.not.exist;
+        done();
+      });
+    });
+
     it('should create item with expected option', function (done) {
       var config = {
         hashKey: 'email',

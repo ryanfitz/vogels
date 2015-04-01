@@ -681,6 +681,7 @@ describe('Vogels Integration Tests', function() {
 
   describe('timestamps', function () {
     var Model;
+    var ModelCustomTimestamps;
 
     before(function (done) {
       Model = vogels.define('vogels-int-test-timestamp', {
@@ -690,6 +691,17 @@ describe('Vogels Integration Tests', function() {
           id : Joi.string()
         }
       });
+
+      ModelCustomTimestamps = vogels.define('vogels-int-test-timestamp-custom', {
+        hashKey : 'id',
+        timestamps : true,
+        createdAt : 'created',
+        updatedAt : 'updated',
+        schema : {
+          id : Joi.string()
+        }
+      });
+
 
       return vogels.createTables(done);
     });
@@ -725,6 +737,38 @@ describe('Vogels Integration Tests', function() {
 
       });
     });
+
+    it('should add custom createdAt param', function (done) {
+      ModelCustomTimestamps.create({id : 'test-1'}, function (err) {
+        expect(err).to.not.exist;
+
+        ModelCustomTimestamps.get('test-1', function (err2, data) {
+          expect(err2).to.not.exist;
+
+          expect(data.get('id')).to.eql('test-1');
+          expect(data.get('created')).to.exist;
+
+          return done();
+        });
+      });
+    });
+
+    it('should add custom updatedAt param', function (done) {
+      ModelCustomTimestamps.update({id : 'test-2'}, function (err) {
+        expect(err).to.not.exist;
+
+        ModelCustomTimestamps.get('test-2', function (err2, data) {
+          expect(err2).to.not.exist;
+
+          expect(data.get('id')).to.eql('test-2');
+          expect(data.get('updated')).to.exist;
+
+          return done();
+        });
+
+      });
+    });
+
   });
 
   describe('#destroy', function () {
