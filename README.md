@@ -462,7 +462,7 @@ BlogPost
 BlogPost
   .query('werner@example.com')
   .where('title').beginsWith('Expanding')
-  .attriubutes(['title', 'content'])
+  .attributes(['title', 'content'])
   .limit(10)
   .exec(callback);
 
@@ -482,7 +482,7 @@ BlogPost
 BlogPost
   .query('werner@example.com')
   .where('title').gt('Expanding')
-  .attriubutes(['title', 'content'])
+  .attributes(['title', 'content'])
   .limit(10)
   .ascending()
   .loadAll()
