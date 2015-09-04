@@ -27,8 +27,9 @@ You can also directly pass in your access key id and secret
 
 ```js
 var vogels = require('vogels');
-vogels.AWS.config.update({accessKeyId: 'AKID', secretAccessKey: 'SECRET'});
+vogels.AWS.config.update({accessKeyId: 'AKID', secretAccessKey: 'SECRET', region: "your-region-code"});
 ```
+
 
 ### Define a Model
 Models are defined through the toplevel define method.
