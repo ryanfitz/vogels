@@ -1,1 +1,1 @@
-FROM iojs:onbuild
+FROM node:5-onbuild

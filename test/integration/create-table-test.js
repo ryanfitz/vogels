@@ -115,27 +115,21 @@ describe('Create Tables Integration Tests', function() {
 
       expect(desc.LocalSecondaryIndexes).to.have.length(2);
 
-      expect(_.find(desc.LocalSecondaryIndexes, { IndexName: 'NickIndex' })).to.eql({
-        IndexName: 'NickIndex',
-        KeySchema:[
-          { AttributeName: 'name', KeyType: 'HASH' },
-          { AttributeName: 'nick', KeyType: 'RANGE' },
-        ],
-        Projection: { ProjectionType: 'ALL' },
-        IndexSizeBytes: 0,
-        ItemCount: 0
-      });
+      var nickIndex = _.find(desc.LocalSecondaryIndexes, { IndexName: 'NickIndex' });
+      expect(nickIndex.IndexName).to.eql('NickIndex');
+      expect(nickIndex.Projection).to.eql({ ProjectionType: 'ALL' });
+      expect(nickIndex.KeySchema).to.eql([
+        { AttributeName: 'name', KeyType: 'HASH' },
+        { AttributeName: 'nick', KeyType: 'RANGE' },
+      ]);
 
-      expect(_.find(desc.LocalSecondaryIndexes, { IndexName: 'TimeIndex' })).to.eql({
-        IndexName: 'TimeIndex',
-        KeySchema:[
-          { AttributeName: 'name', KeyType: 'HASH' },
-          { AttributeName: 'time', KeyType: 'RANGE' },
-        ],
-        Projection: { ProjectionType: 'ALL' },
-        IndexSizeBytes: 0,
-        ItemCount: 0
-      });
+      var timeIndex = _.find(desc.LocalSecondaryIndexes, { IndexName: 'TimeIndex' });
+      expect(timeIndex.IndexName).to.eql('TimeIndex');
+      expect(timeIndex.Projection).to.eql({ ProjectionType: 'ALL' });
+      expect(timeIndex.KeySchema).to.eql([
+        { AttributeName: 'name', KeyType: 'HASH' },
+        { AttributeName: 'time', KeyType: 'RANGE' },
+      ]);
 
       return Model.deleteTable(done);
     });
@@ -178,15 +172,12 @@ describe('Create Tables Integration Tests', function() {
         { AttributeName: 'age', KeyType: 'RANGE' }
       ]);
 
-      expect(desc.LocalSecondaryIndexes).to.eql([
-        { IndexName: 'KeysOnlyNickIndex',
-          KeySchema:[
-            { AttributeName: 'name', KeyType: 'HASH' },
-            { AttributeName: 'nick', KeyType: 'RANGE' },
-          ],
-          Projection: { ProjectionType: 'KEYS_ONLY' },
-          IndexSizeBytes: 0,
-          ItemCount: 0 }
+      var nickIndex = _.find(desc.LocalSecondaryIndexes, { IndexName: 'KeysOnlyNickIndex' });
+      expect(nickIndex.IndexName).to.eql('KeysOnlyNickIndex');
+      expect(nickIndex.Projection).to.eql({ ProjectionType: 'KEYS_ONLY' });
+      expect(nickIndex.KeySchema).to.eql([
+        { AttributeName: 'name', KeyType: 'HASH' },
+        { AttributeName: 'nick', KeyType: 'RANGE' },
       ]);
 
       return Model.deleteTable(done);
@@ -224,17 +215,13 @@ describe('Create Tables Integration Tests', function() {
         { AttributeName: 'age', KeyType: 'RANGE' }
       ]);
 
-      expect(desc.GlobalSecondaryIndexes).to.eql([
-        { IndexName: 'GlobalNickIndex',
-          KeySchema:[
-            { AttributeName: 'nick', KeyType: 'HASH' },
-          ],
-          Projection: { ProjectionType: 'ALL' },
-          ProvisionedThroughput : { ReadCapacityUnits : 1, WriteCapacityUnits : 1},
-          IndexSizeBytes: 0,
-          IndexStatus : 'ACTIVE',
-          ItemCount: 0 }
+      var nickIndex = _.find(desc.GlobalSecondaryIndexes, { IndexName: 'GlobalNickIndex' });
+      expect(nickIndex.IndexName).to.eql('GlobalNickIndex');
+      expect(nickIndex.Projection).to.eql({ ProjectionType: 'ALL' });
+      expect(nickIndex.KeySchema).to.eql([
+        { AttributeName: 'nick', KeyType: 'HASH' },
       ]);
+      expect(nickIndex.ProvisionedThroughput).to.eql({ ReadCapacityUnits : 1, WriteCapacityUnits : 1});
 
       return Model.deleteTable(done);
     });
@@ -279,17 +266,13 @@ describe('Create Tables Integration Tests', function() {
         { AttributeName: 'age', KeyType: 'RANGE' }
       ]);
 
-      expect(desc.GlobalSecondaryIndexes).to.eql([
-        { IndexName: 'GlobalNickIndex',
-          KeySchema:[
-            { AttributeName: 'nick', KeyType: 'HASH' },
-          ],
-          Projection: { ProjectionType: 'INCLUDE', NonKeyAttributes : [ 'wins' ] },
-          ProvisionedThroughput : { ReadCapacityUnits : 10, WriteCapacityUnits : 5},
-          IndexSizeBytes: 0,
-          IndexStatus : 'ACTIVE',
-          ItemCount: 0 }
+      var nickIndex = _.find(desc.GlobalSecondaryIndexes, { IndexName: 'GlobalNickIndex' });
+      expect(nickIndex.IndexName).to.eql('GlobalNickIndex');
+      expect(nickIndex.Projection).to.eql({ ProjectionType: 'INCLUDE', NonKeyAttributes : [ 'wins' ] });
+      expect(nickIndex.KeySchema).to.eql([
+        { AttributeName: 'nick', KeyType: 'HASH' },
       ]);
+      expect(nickIndex.ProvisionedThroughput).to.eql({ ReadCapacityUnits : 10, WriteCapacityUnits : 5});
 
       return Model.deleteTable(done);
     });
@@ -335,54 +318,40 @@ describe('Create Tables Integration Tests', function() {
 
       expect(desc.GlobalSecondaryIndexes).to.have.length(2);
 
-      expect(_.find(desc.GlobalSecondaryIndexes, { IndexName: 'GlobalNickIndex' })).to.eql({
-        IndexName: 'GlobalNickIndex',
-        KeySchema:[
-          { AttributeName: 'nick', KeyType: 'HASH' },
-        ],
-        Projection: { ProjectionType: 'ALL' },
-        ProvisionedThroughput : { ReadCapacityUnits : 1, WriteCapacityUnits : 1},
-        IndexSizeBytes: 0,
-        IndexStatus : 'ACTIVE',
-        ItemCount: 0
-      });
+      var nickIndex = _.find(desc.GlobalSecondaryIndexes, { IndexName: 'GlobalNickIndex' });
+      expect(nickIndex.IndexName).to.eql('GlobalNickIndex');
+      expect(nickIndex.Projection).to.eql({ ProjectionType: 'ALL' });
+      expect(nickIndex.KeySchema).to.eql([
+        { AttributeName: 'nick', KeyType: 'HASH' },
+      ]);
+      expect(nickIndex.ProvisionedThroughput).to.eql({ ReadCapacityUnits : 1, WriteCapacityUnits : 1});
 
-      expect(_.find(desc.GlobalSecondaryIndexes, { IndexName: 'GlobalAgeWinsIndex' })).to.eql({
-        IndexName: 'GlobalAgeWinsIndex',
-        KeySchema:[
-          { AttributeName: 'age', KeyType: 'HASH' },
-          { AttributeName: 'wins', KeyType: 'RANGE' },
-        ],
-        Projection: { ProjectionType: 'ALL' },
-        ProvisionedThroughput : { ReadCapacityUnits : 1, WriteCapacityUnits : 1},
-        IndexSizeBytes: 0,
-        IndexStatus : 'ACTIVE',
-        ItemCount: 0
-      });
+      var ageWinsIndex = _.find(desc.GlobalSecondaryIndexes, { IndexName: 'GlobalAgeWinsIndex' });
+      expect(ageWinsIndex.IndexName).to.eql('GlobalAgeWinsIndex');
+      expect(ageWinsIndex.Projection).to.eql({ ProjectionType: 'ALL' });
+      expect(ageWinsIndex.KeySchema).to.eql([
+        { AttributeName: 'age', KeyType: 'HASH' },
+        { AttributeName: 'wins', KeyType: 'RANGE' },
+      ]);
+      expect(ageWinsIndex.ProvisionedThroughput).to.eql({ ReadCapacityUnits : 1, WriteCapacityUnits : 1});
 
       expect(desc.LocalSecondaryIndexes).to.have.length(2);
 
-      expect(_.find(desc.LocalSecondaryIndexes, { IndexName: 'NameNickIndex' })).to.eql({
-        IndexName: 'NameNickIndex',
-        KeySchema:[
-          { AttributeName: 'name', KeyType: 'HASH' },
-          { AttributeName: 'nick', KeyType: 'RANGE' },
-        ],
-        Projection: { ProjectionType: 'ALL' },
-        IndexSizeBytes: 0,
-        ItemCount: 0
-      });
+      var nameNickIndex = _.find(desc.LocalSecondaryIndexes, { IndexName: 'NameNickIndex' });
+      expect(nameNickIndex.IndexName).to.eql('NameNickIndex');
+      expect(nameNickIndex.Projection).to.eql({ ProjectionType: 'ALL' });
+      expect(nameNickIndex.KeySchema).to.eql([
+        { AttributeName: 'name', KeyType: 'HASH' },
+        { AttributeName: 'nick', KeyType: 'RANGE' },
+      ]);
 
-      expect(_.find(desc.LocalSecondaryIndexes, { IndexName: 'NameWinsIndex' })).to.eql({
-        IndexName: 'NameWinsIndex',
-        KeySchema:[
-          { AttributeName: 'name', KeyType: 'HASH' },
-          { AttributeName: 'wins', KeyType: 'RANGE' },
-        ],
-        Projection: { ProjectionType: 'ALL' },
-        IndexSizeBytes: 0,
-        ItemCount: 0
-      });
+      var nameWinsIndex = _.find(desc.LocalSecondaryIndexes, { IndexName: 'NameWinsIndex' });
+      expect(nameWinsIndex.IndexName).to.eql('NameWinsIndex');
+      expect(nameWinsIndex.Projection).to.eql({ ProjectionType: 'ALL' });
+      expect(nameWinsIndex.KeySchema).to.eql([
+        { AttributeName: 'name', KeyType: 'HASH' },
+        { AttributeName: 'wins', KeyType: 'RANGE' },
+      ]);
 
       return Model.deleteTable(done);
     });
