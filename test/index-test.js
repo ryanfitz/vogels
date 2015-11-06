@@ -1,7 +1,7 @@
 'use strict';
 
 var vogels = require('../index'),
-    DOC    = require('dynamodb-doc'),
+    AWS    = require('aws-sdk'),
     helper = require('./test-helper'),
     Table  = require('../lib/table'),
     chai   = require('chai'),
@@ -106,13 +106,13 @@ describe('vogels', function () {
       var dynamodb = helper.realDynamoDB();
       Account.config({dynamodb: dynamodb });
 
-      Account.docClient.should.eq(dynamodb);
+      Account.docClient.service.config.endpoint.should.eq(dynamodb.config.endpoint);
     });
 
     it('should set document client', function () {
       var Account = vogels.define('Account', {hashKey : 'id'});
 
-      var docClient = new DOC.DynamoDB(helper.realDynamoDB());
+      var docClient = new AWS.DynamoDB.DocumentClient(helper.realDynamoDB());
 
       Account.config({docClient: docClient });
 
@@ -127,8 +127,8 @@ describe('vogels', function () {
       var dynamodb = helper.realDynamoDB();
       vogels.dynamoDriver(dynamodb);
 
-      Account.docClient.should.eq(dynamodb);
-      Post.docClient.should.eq(dynamodb);
+      Account.docClient.service.config.endpoint.should.eq(dynamodb.config.endpoint);
+      Post.docClient.service.config.endpoint.should.eq(dynamodb.config.endpoint);
     });
 
     it('should continue to use globally set dynamodb driver', function () {
@@ -137,7 +137,7 @@ describe('vogels', function () {
 
       var Account = vogels.define('Account', {hashKey : 'id'});
 
-      Account.docClient.should.eq(dynamodb);
+      Account.docClient.service.config.endpoint.should.eq(dynamodb.config.endpoint);
     });
 
   });
@@ -147,8 +147,9 @@ describe('vogels', function () {
 
     beforeEach(function () {
       vogels.reset();
-      var dynamodb = helper.mockDynamoDB();
-      vogels.dynamoDriver(dynamodb);
+      // var dynamodb = helper.mockDynamoDB();
+      // vogels.dynamoDriver(dynamodb);
+      vogels.documentClient(helper.mockDocClient());
       clock = sinon.useFakeTimers();
     });
 
@@ -169,16 +170,18 @@ describe('vogels', function () {
         Table : { TableStatus : 'ACTIVE'}
       };
 
-      Account.docClient.describeTable
+      var dynamodb = Account.docClient.service;
+
+      dynamodb.describeTable
         .onCall(0).yields(null, null)
         .onCall(1).yields(null, second)
         .onCall(2).yields(null, third);
 
-      Account.docClient.createTable.yields(null, null);
+      dynamodb.createTable.yields(null, null);
 
       vogels.createTables(function (err) {
         expect(err).to.not.exist;
-        expect(Account.docClient.describeTable.calledThrice).to.be.true;
+        expect(dynamodb.describeTable.calledThrice).to.be.true;
         return done();
       });
 
@@ -189,19 +192,21 @@ describe('vogels', function () {
     it('should return error', function (done) {
       var Account = vogels.define('Account', {hashKey : 'id'});
 
-      Account.docClient.describeTable.onCall(0).yields(null, null);
+      var dynamodb = Account.docClient.service;
+      dynamodb.describeTable.onCall(0).yields(null, null);
 
-      Account.docClient.createTable.yields(new Error('Fail'), null);
+      dynamodb.createTable.yields(new Error('Fail'), null);
 
       vogels.createTables(function (err) {
         expect(err).to.exist;
-        expect(Account.docClient.describeTable.calledOnce).to.be.true;
+        expect(dynamodb.describeTable.calledOnce).to.be.true;
         return done();
       });
     });
 
     it('should create model without callback', function (done) {
       var Account = vogels.define('Account', {hashKey : 'id'});
+      var dynamodb = Account.docClient.service;
 
       var second = {
         Table : { TableStatus : 'PENDING'}
@@ -211,39 +216,40 @@ describe('vogels', function () {
         Table : { TableStatus : 'ACTIVE'}
       };
 
-      Account.docClient.describeTable
+      dynamodb.describeTable
         .onCall(0).yields(null, null)
         .onCall(1).yields(null, second)
         .onCall(2).yields(null, third);
 
-      Account.docClient.createTable.yields(null, null);
+      dynamodb.createTable.yields(null, null);
 
       vogels.createTables();
 
       clock.tick(1200);
       clock.tick(1200);
 
-      expect(Account.docClient.describeTable.calledThrice).to.be.true;
+      expect(dynamodb.describeTable.calledThrice).to.be.true;
       return done();
     });
 
     it('should return error when waiting for table to become active', function (done) {
       var Account = vogels.define('Account', {hashKey : 'id'});
+      var dynamodb = Account.docClient.service;
 
       var second = {
         Table : { TableStatus : 'PENDING'}
       };
 
-      Account.docClient.describeTable
+      dynamodb.describeTable
         .onCall(0).yields(null, null)
         .onCall(1).yields(null, second)
         .onCall(2).yields(new Error('fail'));
 
-      Account.docClient.createTable.yields(null, null);
+      dynamodb.createTable.yields(null, null);
 
       vogels.createTables(function (err) {
         expect(err).to.exist;
-        expect(Account.docClient.describeTable.calledThrice).to.be.true;
+        expect(dynamodb.describeTable.calledThrice).to.be.true;
         return done();
       });
 

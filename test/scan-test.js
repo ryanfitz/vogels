@@ -227,100 +227,113 @@ describe('Scan', function () {
     it('should have equals clause', function() {
       scan = scan.where('email').equals('foo@example.com');
 
-      internals.assertScanFilter(scan, {AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'EQ'});
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({':email' : 'foo@example.com'});
+      scan.request.FilterExpression.should.eql('(#email = :email)');
     });
 
     it('should have not equals clause', function() {
       scan = scan.where('email').ne('foo@example.com');
 
-      internals.assertScanFilter(scan, {AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'NE'});
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({':email' : 'foo@example.com'});
+      scan.request.FilterExpression.should.eql('(#email <> :email)');
     });
 
     it('should have less than or equal clause', function() {
       scan = scan.where('email').lte('foo@example.com');
 
-      internals.assertScanFilter(scan, {AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'LE'});
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({':email' : 'foo@example.com'});
+      scan.request.FilterExpression.should.eql('(#email <= :email)');
     });
 
     it('should have less than clause', function() {
       scan = scan.where('email').lt('foo@example.com');
 
-      internals.assertScanFilter(scan, {AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'LT'});
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({':email' : 'foo@example.com'});
+      scan.request.FilterExpression.should.eql('(#email < :email)');
     });
 
     it('should have greater than or equal clause', function() {
       scan = scan.where('email').gte('foo@example.com');
 
-      internals.assertScanFilter(scan, {AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'GE'});
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({':email' : 'foo@example.com'});
+      scan.request.FilterExpression.should.eql('(#email >= :email)');
     });
 
     it('should have greater than clause', function() {
       scan = scan.where('email').gt('foo@example.com');
 
-      internals.assertScanFilter(scan, {AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'GT'});
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({':email' : 'foo@example.com'});
+      scan.request.FilterExpression.should.eql('(#email > :email)');
     });
 
     it('should have not null clause', function() {
       scan = scan.where('email').notNull();
 
-      internals.assertScanFilter(scan, {ComparisonOperator: 'NOT_NULL'});
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({});
+      scan.request.FilterExpression.should.eql('(attribute_exists(#email))');
     });
 
     it('should have null clause', function() {
       scan = scan.where('email').null();
 
-      internals.assertScanFilter(scan, {ComparisonOperator: 'NULL'});
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({});
+      scan.request.FilterExpression.should.eql('(attribute_not_exists(#email))');
     });
 
     it('should have contains clause', function() {
       scan = scan.where('email').contains('foo@example.com');
 
-      internals.assertScanFilter(scan, {AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'CONTAINS'});
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({':email' : 'foo@example.com'});
+      scan.request.FilterExpression.should.eql('(contains(#email, :email))');
     });
 
     it('should not pass a number set when making contains call', function() {
       scan = scan.where('scores').contains(2);
 
-      internals.assertScanFilter(scan, {AttributeValueList: [{N: '2'}], ComparisonOperator: 'CONTAINS'});
+      scan.request.ExpressionAttributeNames.should.eql({'#scores' : 'scores'});
+      scan.request.ExpressionAttributeValues.should.eql({':scores' : 2});
+      scan.request.FilterExpression.should.eql('(contains(#scores, :scores))');
     });
 
     it('should have not contains clause', function() {
       scan = scan.where('email').notContains('foo@example.com');
 
-      internals.assertScanFilter(scan, {AttributeValueList: [{S: 'foo@example.com'}], ComparisonOperator: 'NOT_CONTAINS'});
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({':email' : 'foo@example.com'});
+      scan.request.FilterExpression.should.eql('(NOT contains(#email, :email))');
     });
 
-    it.skip('should have in clause', function() {
-      // TODO there is a bug in dynamodb-doc lib
-      // that needs to get fixed til this test can pass
+    it('should have in clause', function() {
       scan = scan.where('email').in(['foo@example.com', 'test@example.com']);
 
-      var expected ={
-        AttributeValueList: [{S: 'foo@example.com'}, {S: 'test@example.com'}],
-        ComparisonOperator: 'IN'
-      };
-
-      internals.assertScanFilter(scan, expected);
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({':email_1' : 'foo@example.com', ':email_2' : 'test@example.com'});
+      scan.request.FilterExpression.should.eql('(#email IN (:email_1,:email_2))');
     });
 
     it('should have begins with clause', function() {
       scan = scan.where('email').beginsWith('foo');
 
-      internals.assertScanFilter(scan, {AttributeValueList: [{S: 'foo'}], ComparisonOperator: 'BEGINS_WITH'});
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({':email' : 'foo'});
+      scan.request.FilterExpression.should.eql('(begins_with(#email, :email))');
     });
 
     it('should have between clause', function() {
       scan = scan.where('email').between('bob@bob.com', 'foo@foo.com');
 
-      var expected = {
-        AttributeValueList: [
-          {S: 'bob@bob.com'},
-          {S: 'foo@foo.com'}
-        ],
-        ComparisonOperator: 'BETWEEN'
-      };
-
-      internals.assertScanFilter(scan, expected);
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({':email' : 'bob@bob.com', ':email_2' : 'foo@foo.com'});
+      scan.request.FilterExpression.should.eql('(#email BETWEEN :email AND :email_2)');
     });
 
     it('should have multiple filters', function() {
@@ -328,19 +341,19 @@ describe('Scan', function () {
         .where('name').equals('Tim')
         .where('email').beginsWith('foo');
 
-      var expected = [
-        {AttributeValueList: [{S: 'Tim'}], ComparisonOperator: 'EQ'},
-        {AttributeValueList: [{S: 'foo'}], ComparisonOperator: 'BEGINS_WITH'}
-      ];
-
-      internals.assertScanFilter(scan, expected);
+      scan.request.ExpressionAttributeNames.should.eql({'#name' : 'name', '#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({':name' : 'Tim', ':email' : 'foo'});
+      scan.request.FilterExpression.should.eql('(#name = :name) AND (begins_with(#email, :email))');
     });
 
     it('should convert date to iso string', function() {
       var d = new Date();
       scan = scan.where('created').equals(d);
 
-      internals.assertScanFilter(scan, {AttributeValueList: [{S: d.toISOString()}], ComparisonOperator: 'EQ'});
+      console.log('scan info', scan.request);
+      scan.request.ExpressionAttributeNames.should.eql({'#created' : 'created'});
+      scan.request.ExpressionAttributeValues.should.eql({':created' : d.toISOString()});
+      scan.request.FilterExpression.should.eql('(#created = :created)');
     });
 
   });

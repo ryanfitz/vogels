@@ -25,7 +25,7 @@ describe('item', function() {
 
     var schema = new Schema(config);
 
-    table = new Table('mockTable', schema, serializer, helper.mockDynamoDB());
+    table = new Table('mockTable', schema, serializer, helper.mockDocClient());
   });
 
   it('JSON.stringify should only serialize attrs', function() {
@@ -39,7 +39,7 @@ describe('item', function() {
   describe('#save', function () {
 
     it('should return error', function (done) {
-      table.docClient.putItem.yields(new Error('fail'));
+      table.docClient.put.yields(new Error('fail'));
 
       var attrs = {num: 1, name: 'foo'};
       var item = new Item(attrs, table);
@@ -57,7 +57,7 @@ describe('item', function() {
 
   describe('#update', function () {
     it('should return item', function (done) {
-      table.docClient.updateItem.yields(null, {Attributes : {num : 1, name : 'foo'}});
+      table.docClient.update.yields(null, {Attributes : {num : 1, name : 'foo'}});
 
       var attrs = {num: 1, name: 'foo'};
       var item = new Item(attrs, table);
@@ -72,7 +72,7 @@ describe('item', function() {
 
 
     it('should return error', function (done) {
-      table.docClient.updateItem.yields(new Error('fail'));
+      table.docClient.update.yields(new Error('fail'));
 
       var attrs = {num: 1, name: 'foo'};
       var item = new Item(attrs, table);
@@ -87,7 +87,7 @@ describe('item', function() {
     });
 
     it('should return null', function (done) {
-      table.docClient.updateItem.yields(null, {});
+      table.docClient.update.yields(null, {});
 
       var attrs = {num: 1, name: 'foo'};
       var item = new Item(attrs, table);

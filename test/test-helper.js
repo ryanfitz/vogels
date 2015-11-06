@@ -3,7 +3,6 @@
 var sinon = require('sinon'),
     AWS   = require('aws-sdk'),
     Table = require('../lib/table'),
-    DOC   = require('dynamodb-doc'),
     _     = require('lodash');
 
 exports.mockDynamoDB = function () {
@@ -31,8 +30,39 @@ exports.realDynamoDB = function () {
   return new AWS.DynamoDB(opts);
 };
 
+
 exports.mockDocClient = function () {
-  return new DOC.DynamoDB(exports.mockDynamoDB());
+  var client = new AWS.DynamoDB.DocumentClient({service : exports.mockDynamoDB()});
+
+  var operations= [
+    'batchGet',
+    'batchWrite',
+    'put',
+    'get',
+    'delete',
+    'update',
+    'scan',
+    'query'
+  ];
+
+  _.each(operations, function (op) {
+    client[op] = sinon.stub();
+  });
+
+  client.service.scan          = sinon.stub();
+  client.service.putItem       = sinon.stub();
+  client.service.deleteItem    = sinon.stub();
+  client.service.query         = sinon.stub();
+  client.service.getItem       = sinon.stub();
+  client.service.updateItem    = sinon.stub();
+  client.service.createTable   = sinon.stub();
+  client.service.describeTable = sinon.stub();
+  client.service.updateTable   = sinon.stub();
+  client.service.deleteTable   = sinon.stub();
+  client.service.batchGetItem  = sinon.stub();
+  client.service.batchWriteItem = sinon.stub();
+
+  return client;
 };
 
 exports.mockSerializer = function () {
