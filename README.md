@@ -23,12 +23,26 @@ var vogels = require('vogels');
 vogels.AWS.config.loadFromPath('credentials.json');
 ```
 
-You can also directly pass in your access key id and secret
+You can also pass in your access key id, secret and region code directly as parameter object to the following function:
 
 ```js
 var vogels = require('vogels');
-vogels.AWS.config.update({accessKeyId: 'AKID', secretAccessKey: 'SECRET'});
+vogels.AWS.config.update({accessKeyId: 'AKID', secretAccessKey: 'SECRET', region: "your-region-code"});
 ```
+Currently the following region codes are available in Amazon:
+
+|      Code      |           Name           |
+| -------------- | ------------------------ |
+| ap-northeast-1 | Asia Pacific (Tokyo)     |
+| ap-southeast-1 | Asia Pacific (Singapore) |
+| ap-southeast-2 | Asia Pacific (Sydney)    |
+| eu-central-1   | EU (Frankfurt)           |
+| eu-west-1      | EU (Ireland)             |
+| sa-east-1      | South America (Sao Paulo)|
+| us-east-1      | US East (N. Virginia)    |
+| us-west-1      | US West (N. California)  |
+| us-west-2      | US West (Oregon)         |
+
 
 ### Define a Model
 Models are defined through the toplevel define method.
