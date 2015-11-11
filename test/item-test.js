@@ -25,7 +25,7 @@ describe('item', function() {
 
     var schema = new Schema(config);
 
-    table = new Table('mockTable', schema, serializer, helper.mockDocClient());
+    table = new Table('mockTable', schema, serializer, helper.mockDocClient(), helper.testLogger());
   });
 
   it('JSON.stringify should only serialize attrs', function() {

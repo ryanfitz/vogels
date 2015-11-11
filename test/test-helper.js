@@ -1,9 +1,10 @@
 'use strict';
 
-var sinon = require('sinon'),
-    AWS   = require('aws-sdk'),
-    Table = require('../lib/table'),
-    _     = require('lodash');
+var sinon  = require('sinon'),
+    AWS    = require('aws-sdk'),
+    Table  = require('../lib/table'),
+    _      = require('lodash'),
+    bunyan = require('bunyan');
 
 exports.mockDynamoDB = function () {
   var opts = { endpoint : 'http://dynamodb-local:8000', apiVersion: '2012-08-10' };
@@ -29,7 +30,6 @@ exports.realDynamoDB = function () {
   var opts = { endpoint : 'http://dynamodb-local:8000', apiVersion: '2012-08-10' };
   return new AWS.DynamoDB(opts);
 };
-
 
 exports.mockDocClient = function () {
   var client = new AWS.DynamoDB.DocumentClient({service : exports.mockDynamoDB()});
@@ -91,4 +91,12 @@ exports.fakeUUID = function () {
 
 exports.randomName = function (prefix) {
   return prefix + '_' + Date.now() + '.' + _.random(1000);
+};
+
+exports.testLogger = function() {
+  return bunyan.createLogger({
+    name: 'vogels-tests',
+    serializers : {err: bunyan.stdSerializers.err},
+    level : bunyan.FATAL
+  });
 };
