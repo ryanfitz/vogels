@@ -350,7 +350,6 @@ describe('Scan', function () {
       var d = new Date();
       scan = scan.where('created').equals(d);
 
-      console.log('scan info', scan.request);
       scan.request.ExpressionAttributeNames.should.eql({'#created' : 'created'});
       scan.request.ExpressionAttributeValues.should.eql({':created' : d.toISOString()});
       scan.request.FilterExpression.should.eql('(#created = :created)');

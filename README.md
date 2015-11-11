@@ -932,6 +932,23 @@ var Event = vogels.define('Event', {
 });
 ```
 
+### Logging
+Logging can be enabled to provide detailed information on data being sent and returned from DynamoDB.
+By default logging is turned off.
+
+```js
+vogels.log.level('info'); // enabled INFO log level 
+```
+
+Logging can also be enabled / disabled at the model level.
+
+```js
+var Account = vogels.define('Account', {hashKey : 'email'});
+var Event = vogels.define('Account', {hashKey : 'name'});
+
+Account.log.level('warn'); // enable WARN log level for Account model operations
+```
+
 ## Examples
 
 ```js
