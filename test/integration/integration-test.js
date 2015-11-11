@@ -385,7 +385,7 @@ describe('Vogels Integration Tests', function() {
           var published = t.get('PublishedDateTime');
 
           if(prev) {
-            expect(published).to.be.below(prev);
+            expect(published).to.be.at.most(prev);
           }
 
           prev = published;
@@ -413,7 +413,7 @@ describe('Vogels Integration Tests', function() {
           var published = t.get('PublishedDateTime');
 
           if(prev) {
-            expect(published).to.be.below(prev);
+            expect(published).to.be.at.most(prev);
           }
 
           prev = published;
