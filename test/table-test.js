@@ -18,11 +18,13 @@ chai.should();
 describe('table', function () {
   var table,
       serializer,
-      docClient;
+      docClient,
+      dynamodb;
 
   beforeEach(function () {
     serializer = helper.mockSerializer(),
     docClient = helper.mockDocClient();
+    dynamodb = docClient.service;
   });
 
   describe('#get', function () {
@@ -45,7 +47,7 @@ describe('table', function () {
         Item : {email: 'test@test.com', name: 'test dude'}
       };
 
-      docClient.getItem.withArgs(request).yields(null, resp);
+      docClient.get.withArgs(request).yields(null, resp);
 
       table.get('test@test.com', function (err, account) {
         account.should.be.instanceof(Item);
@@ -78,7 +80,7 @@ describe('table', function () {
         Item : {email: 'test@test.com', name: 'Tim Tester'}
       };
 
-      docClient.getItem.withArgs(request).yields(null, resp);
+      docClient.get.withArgs(request).yields(null, resp);
 
       table.get('Tim Tester', 'test@test.com', function (err, account) {
         account.should.be.instanceof(Item);
@@ -108,7 +110,7 @@ describe('table', function () {
         Item : {email: 'test@test.com', name: 'test dude'}
       };
 
-      docClient.getItem.withArgs(request).yields(null, resp);
+      docClient.get.withArgs(request).yields(null, resp);
 
       table.get('test@test.com', {ConsistentRead: true}, function (err, account) {
         account.should.be.instanceof(Item);
@@ -142,7 +144,7 @@ describe('table', function () {
         Item : {email: 'test@test.com', name: 'Tim Tester'}
       };
 
-      docClient.getItem.withArgs(request).yields(null, resp);
+      docClient.get.withArgs(request).yields(null, resp);
 
       table.get('Tim Tester', 'test@test.com', {ConsistentRead: true}, function (err, account) {
         account.should.be.instanceof(Item);
@@ -175,7 +177,7 @@ describe('table', function () {
         Item : {email: 'test@test.com', name: 'test dude'}
       };
 
-      docClient.getItem.withArgs(request).yields(null, resp);
+      docClient.get.withArgs(request).yields(null, resp);
 
       table.get('test@test.com', function (err, account) {
         account.should.be.instanceof(Item);
@@ -195,7 +197,7 @@ describe('table', function () {
 
       table = new Table('accounts', s, realSerializer, docClient);
 
-      docClient.getItem.yields(new Error('Fail'));
+      docClient.get.yields(new Error('Fail'));
 
       table.get('test@test.com', function (err, account) {
         expect(err).to.exist;
@@ -231,7 +233,7 @@ describe('table', function () {
         }
       };
 
-      docClient.putItem.withArgs(request).yields(null, {});
+      docClient.put.withArgs(request).yields(null, {});
 
       table.create(request.Item, function (err, account) {
         expect(err).to.not.exist;
@@ -267,7 +269,7 @@ describe('table', function () {
         }
       };
 
-      docClient.putItem.withArgs(request).yields(null, {});
+      docClient.put.withArgs(request).yields(null, {});
 
       table.create({email : 'test@test.com', age: 23}, function (err, account) {
         expect(err).to.not.exist;
@@ -297,10 +299,10 @@ describe('table', function () {
       table = new Table('accounts', s, realSerializer, docClient);
 
       var numberSet = sinon.match(function (value) {
-        var s = docClient.Set([1, 2, 3], 'N');
+        var s = docClient.createSet([1, 2, 3]);
 
-        value.datatype.should.eql('NS');
-        value.contents.should.eql(s.contents);
+        value.type.should.eql('Number');
+        value.values.should.eql(s.values);
 
         return true;
       }, 'NumberSet');
@@ -314,7 +316,7 @@ describe('table', function () {
         }
       };
 
-      docClient.putItem.withArgs(request).yields(null, {});
+      docClient.put.withArgs(request).yields(null, {});
 
       var item = {email : 'test@test.com', name : 'Tim Test', age : null, favoriteNumbers: [], luckyNumbers: [1, 2, 3]};
       table.create(item, function (err, account) {
@@ -351,7 +353,7 @@ describe('table', function () {
         }
       };
 
-      docClient.putItem.withArgs(request).yields(null, {});
+      docClient.put.withArgs(request).yields(null, {});
 
       table.create({email : 'test@test.com'}, function (err, account) {
         expect(err).to.not.exist;
@@ -385,7 +387,7 @@ describe('table', function () {
         }
       };
 
-      docClient.putItem.withArgs(request).yields(null, {});
+      docClient.put.withArgs(request).yields(null, {});
 
       table.create({email : 'test@test.com'}, function (err, account) {
         expect(err).to.not.exist;
@@ -419,7 +421,7 @@ describe('table', function () {
         }
       };
 
-      docClient.putItem.withArgs(request).yields(null, {});
+      docClient.put.withArgs(request).yields(null, {});
 
       table.create({email : 'test@test.com'}, function (err, account) {
         expect(err).to.not.exist;
@@ -454,7 +456,7 @@ describe('table', function () {
         }
       };
 
-      docClient.putItem.withArgs(request).yields(null, {});
+      docClient.put.withArgs(request).yields(null, {});
 
       table.create({email : 'test@test.com'}, {expected: {name: 'Foo Bar'}}, function (err, account) {
         expect(err).to.not.exist;
@@ -485,11 +487,11 @@ describe('table', function () {
         }
       };
 
-      docClient.putItem.withArgs(request).yields(null, {});
+      docClient.put.withArgs(request).yields(null, {});
 
       table.create({email : 'test@test.com'});
 
-      docClient.putItem.calledWith(request);
+      docClient.put.calledWith(request);
       return done();
     });
 
@@ -511,7 +513,7 @@ describe('table', function () {
         expect(err).to.match(/ValidationError/);
         expect(account).to.not.exist;
 
-        sinon.assert.notCalled(docClient.putItem);
+        sinon.assert.notCalled(docClient.put);
         done();
       });
     });
@@ -550,7 +552,7 @@ describe('table', function () {
         scores : [97, 86]
       };
 
-      docClient.updateItem.withArgs(request).yields(null, {Attributes: returnedAttributes});
+      docClient.update.withArgs(request).yields(null, {Attributes: returnedAttributes});
 
       var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
       table.update(item, function (err, account) {
@@ -600,7 +602,7 @@ describe('table', function () {
 
       var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
 
-      docClient.updateItem.withArgs(request).yields(null, {Attributes: returnedAttributes});
+      docClient.update.withArgs(request).yields(null, {Attributes: returnedAttributes});
 
       table.update(item, {ReturnValues: 'ALL_OLD', expected: {name: 'Foo Bar'}}, function (err, account) {
         account.should.be.instanceof(Item);
@@ -647,7 +649,7 @@ describe('table', function () {
 
       var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
 
-      docClient.updateItem.withArgs(request).yields(null, {Attributes: returnedAttributes});
+      docClient.update.withArgs(request).yields(null, {Attributes: returnedAttributes});
 
       var options = {
         UpdateExpression : 'ADD #color :c',
@@ -698,12 +700,12 @@ describe('table', function () {
         scores : [97, 86]
       };
 
-      docClient.updateItem.withArgs(request).yields(null, {Attributes: returnedAttributes});
+      docClient.update.withArgs(request).yields(null, {Attributes: returnedAttributes});
 
       var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
       table.update(item);
 
-      docClient.updateItem.calledWith(request);
+      docClient.update.calledWith(request);
       return done();
     });
 
@@ -721,7 +723,7 @@ describe('table', function () {
 
       table = new Table('accounts', s, realSerializer, docClient);
 
-      docClient.updateItem.yields(new Error('Fail'));
+      docClient.update.yields(new Error('Fail'));
 
       var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
 
@@ -797,13 +799,13 @@ describe('table', function () {
         }
       };
 
-      docClient.deleteItem.yields(null, {});
+      docClient.delete.yields(null, {});
 
       serializer.buildKey.returns(request.Key);
 
       table.destroy('test@test.com', function () {
         serializer.buildKey.calledWith('test@test.com', null, s).should.be.true;
-        docClient.deleteItem.calledWith(request).should.be.true;
+        docClient.delete.calledWith(request).should.be.true;
 
         done();
       });
@@ -831,13 +833,13 @@ describe('table', function () {
         ReturnValues : 'ALL_OLD'
       };
 
-      docClient.deleteItem.yields(null, {});
+      docClient.delete.yields(null, {});
 
       serializer.buildKey.returns(request.Key);
 
       table.destroy('test@test.com', {ReturnValues: 'ALL_OLD'}, function () {
         serializer.buildKey.calledWith('test@test.com', null, s).should.be.true;
-        docClient.deleteItem.calledWith(request).should.be.true;
+        docClient.delete.calledWith(request).should.be.true;
 
         done();
       });
@@ -868,7 +870,7 @@ describe('table', function () {
         name  : 'Foo Bar'
       };
 
-      docClient.deleteItem.yields(null, {Attributes: returnedAttributes});
+      docClient.delete.yields(null, {Attributes: returnedAttributes});
 
       serializer.buildKey.returns(request.Key);
       serializer.deserializeItem.withArgs(returnedAttributes).returns(
@@ -877,7 +879,7 @@ describe('table', function () {
 
       table.destroy('test@test.com', {ReturnValues: 'ALL_OLD'}, function (err, item) {
         serializer.buildKey.calledWith('test@test.com', null, s).should.be.true;
-        docClient.deleteItem.calledWith(request).should.be.true;
+        docClient.delete.calledWith(request).should.be.true;
 
         item.get('name').should.equal('Foo Bar');
 
@@ -913,7 +915,7 @@ describe('table', function () {
         name  : 'Foo Bar'
       };
 
-      docClient.deleteItem.yields(null, {Attributes: returnedAttributes});
+      docClient.delete.yields(null, {Attributes: returnedAttributes});
 
       serializer.buildKey.returns(request.Key);
       serializer.deserializeItem.withArgs(returnedAttributes).returns(
@@ -922,7 +924,7 @@ describe('table', function () {
 
       table.destroy('test@test.com', 'Foo Bar', function (err, item) {
         serializer.buildKey.calledWith('test@test.com', 'Foo Bar', s).should.be.true;
-        docClient.deleteItem.calledWith(request).should.be.true;
+        docClient.delete.calledWith(request).should.be.true;
 
         item.get('name').should.equal('Foo Bar');
 
@@ -959,7 +961,7 @@ describe('table', function () {
         name  : 'Foo Bar'
       };
 
-      docClient.deleteItem.yields(null, {Attributes: returnedAttributes});
+      docClient.delete.yields(null, {Attributes: returnedAttributes});
 
       serializer.buildKey.returns(request.Key);
       serializer.deserializeItem.withArgs(returnedAttributes).returns(
@@ -968,7 +970,7 @@ describe('table', function () {
 
       table.destroy('test@test.com', 'Foo Bar', {ReturnValues: 'ALL_OLD'}, function (err, item) {
         serializer.buildKey.calledWith('test@test.com', 'Foo Bar', s).should.be.true;
-        docClient.deleteItem.calledWith(request).should.be.true;
+        docClient.delete.calledWith(request).should.be.true;
 
         item.get('name').should.equal('Foo Bar');
 
@@ -1000,14 +1002,14 @@ describe('table', function () {
         }
       };
 
-      docClient.deleteItem.yields(null, {});
+      docClient.delete.yields(null, {});
 
       serializer.serializeItem.withArgs(s, {name: 'Foo Bar'}, {expected : true}).returns(request.Expected);
       serializer.buildKey.returns(request.Key);
 
       table.destroy('test@test.com', {expected: {name : 'Foo Bar'}}, function () {
         serializer.buildKey.calledWith('test@test.com', null, s).should.be.true;
-        docClient.deleteItem.calledWith(request).should.be.true;
+        docClient.delete.calledWith(request).should.be.true;
 
         done();
       });
@@ -1034,10 +1036,10 @@ describe('table', function () {
         }
       };
 
-      docClient.deleteItem.yields(null, {});
+      docClient.delete.yields(null, {});
       table.destroy('test@test.com');
 
-      docClient.deleteItem.calledWith(request);
+      docClient.delete.calledWith(request);
 
       return done();
     });
@@ -1066,10 +1068,10 @@ describe('table', function () {
         }
       };
 
-      docClient.deleteItem.yields(null, {});
+      docClient.delete.yields(null, {});
       table.destroy('test@test.com', {expected: {name : 'Foo Bar'}});
 
-      docClient.deleteItem.calledWith(request);
+      docClient.delete.calledWith(request);
 
       return done();
     });
@@ -1100,11 +1102,11 @@ describe('table', function () {
         ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
       };
 
-      docClient.createTable.yields(null, {});
+      dynamodb.createTable.yields(null, {});
 
       table.createTable({readCapacity : 5, writeCapacity: 5}, function (err) {
         expect(err).to.be.null;
-        docClient.createTable.calledWith(request).should.be.true;
+        dynamodb.createTable.calledWith(request).should.be.true;
         done();
       });
 
@@ -1137,11 +1139,11 @@ describe('table', function () {
         ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
       };
 
-      docClient.createTable.yields(null, {});
+      dynamodb.createTable.yields(null, {});
 
       table.createTable({readCapacity : 5, writeCapacity: 5}, function (err) {
         expect(err).to.be.null;
-        docClient.createTable.calledWith(request).should.be.true;
+        dynamodb.createTable.calledWith(request).should.be.true;
         done();
       });
 
@@ -1191,11 +1193,11 @@ describe('table', function () {
         ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
       };
 
-      docClient.createTable.yields(null, {});
+      dynamodb.createTable.yields(null, {});
 
       table.createTable({readCapacity : 5, writeCapacity: 5}, function (err) {
         expect(err).to.be.null;
-        docClient.createTable.calledWith(request).should.be.true;
+        dynamodb.createTable.calledWith(request).should.be.true;
         done();
       });
     });
@@ -1245,11 +1247,11 @@ describe('table', function () {
         ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
       };
 
-      docClient.createTable.yields(null, {});
+      dynamodb.createTable.yields(null, {});
 
       table.createTable({readCapacity : 5, writeCapacity: 5}, function (err) {
         expect(err).to.be.null;
-        docClient.createTable.calledWith(request).should.be.true;
+        dynamodb.createTable.calledWith(request).should.be.true;
         done();
       });
     });
@@ -1306,11 +1308,11 @@ describe('table', function () {
         ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
       };
 
-      docClient.createTable.yields(null, {});
+      dynamodb.createTable.yields(null, {});
 
       table.createTable({readCapacity : 5, writeCapacity: 5}, function (err) {
         expect(err).to.be.null;
-        docClient.createTable.calledWith(request).should.be.true;
+        dynamodb.createTable.calledWith(request).should.be.true;
         done();
       });
     });
@@ -1335,11 +1337,11 @@ describe('table', function () {
         TableName: 'accounts'
       };
 
-      docClient.describeTable.yields(null, {});
+      dynamodb.describeTable.yields(null, {});
 
       table.describeTable(function (err) {
         expect(err).to.be.null;
-        docClient.describeTable.calledWith(request).should.be.true;
+        dynamodb.describeTable.calledWith(request).should.be.true;
         done();
       });
     });
@@ -1368,11 +1370,11 @@ describe('table', function () {
         ProvisionedThroughput: { ReadCapacityUnits: 4, WriteCapacityUnits: 2 }
       };
 
-      docClient.updateTable.yields(null, {});
+      dynamodb.updateTable.yields(null, {});
 
       table.updateTable({readCapacity: 4, writeCapacity: 2}, function (err) {
         expect(err).to.be.null;
-        docClient.updateTable.calledWith(request).should.be.true;
+        dynamodb.updateTable.calledWith(request).should.be.true;
         done();
       });
     });
@@ -1385,7 +1387,7 @@ describe('table', function () {
 
       table.updateTable({readCapacity: 2, writeCapacity: 1});
 
-      docClient.updateTable.calledWith(request).should.be.true;
+      dynamodb.updateTable.calledWith(request).should.be.true;
 
       return done();
     });
@@ -1412,11 +1414,11 @@ describe('table', function () {
         TableName: 'accounts'
       };
 
-      docClient.deleteTable.yields(null, {});
+      dynamodb.deleteTable.yields(null, {});
 
       table.deleteTable(function (err) {
         expect(err).to.be.null;
-        docClient.deleteTable.calledWith(request).should.be.true;
+        dynamodb.deleteTable.calledWith(request).should.be.true;
         done();
       });
     });
@@ -1428,7 +1430,7 @@ describe('table', function () {
 
       table.deleteTable();
 
-      docClient.deleteTable.calledWith(request).should.be.true;
+      dynamodb.deleteTable.calledWith(request).should.be.true;
 
       return done();
     });
@@ -1515,7 +1517,7 @@ describe('table', function () {
         table = new Table('accounts', s, serializer, docClient);
 
         var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
-        docClient.putItem.yields(null, {});
+        docClient.put.yields(null, {});
 
         serializer.serializeItem.withArgs(s, {email : 'test@test.com', name : 'Tommy', age : 23}).returns({});
 
@@ -1583,7 +1585,7 @@ describe('table', function () {
         table = new Table('accounts', s, serializer, docClient);
 
         var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
-        docClient.putItem.yields(null, {});
+        docClient.put.yields(null, {});
 
         serializer.serializeItem.withArgs(s, item).returns({});
 
@@ -1614,7 +1616,7 @@ describe('table', function () {
         table = new Table('accounts', s, serializer, docClient);
 
         var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
-        docClient.updateItem.yields(null, {});
+        docClient.update.yields(null, {});
 
         serializer.serializeItem.withArgs(s, item).returns({});
 
@@ -1623,7 +1625,7 @@ describe('table', function () {
         serializer.serializeItemForUpdate.withArgs(s, 'PUT', modified).returns({});
 
         serializer.deserializeItem.returns(modified);
-        docClient.updateItem.yields(null, {});
+        docClient.update.yields(null, {});
 
         var called = false;
         table.before('update', function (data, next) {
@@ -1681,7 +1683,7 @@ describe('table', function () {
         table = new Table('accounts', s, serializer, docClient);
 
         var item = {email : 'test@test.com', name : 'Tim Test', age : 23};
-        docClient.updateItem.yields(null, {});
+        docClient.update.yields(null, {});
 
         serializer.serializeItem.withArgs(s, item).returns({});
 
@@ -1689,8 +1691,7 @@ describe('table', function () {
         serializer.serializeItemForUpdate.returns({});
 
         serializer.deserializeItem.returns(item);
-        docClient.updateItem.yields(null, {});
-
+        docClient.update.yields(null, {});
 
         table.after('update', function () {
           return done();
@@ -1714,7 +1715,7 @@ describe('table', function () {
 
       table = new Table('accounts', s, serializer, docClient);
 
-      docClient.deleteItem.yields(null, {});
+      docClient.delete.yields(null, {});
       serializer.buildKey.returns({});
 
       table.after('destroy', function () {

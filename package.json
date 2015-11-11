@@ -20,8 +20,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "2.1.x",
-    "dynamodb-doc": "1.0.x",
+    "aws-sdk": "2.2.x",
     "lodash": "3.1.x",
     "joi": "5.x.x",
     "node-uuid": "1.4.x",
@@ -32,7 +31,7 @@
     "istanbul": "^0.3.5",
     "jscoverage": "^0.5.9",
     "jshint": "2.x.x",
-    "jshint-stylish": "^1.0.0",
+    "jshint-stylish": "2.x.x",
     "mocha": "2.x.x",
     "sinon": "1.12.x"
   }

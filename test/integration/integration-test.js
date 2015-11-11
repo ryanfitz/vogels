@@ -442,6 +442,22 @@ describe('Vogels Integration Tests', function() {
       });
     });
 
+    it('should return tweets that match IN filter', function(done) {
+      Tweet.query('userid-1')
+        .filter('num').in([4, 6, 8])
+        .exec(function (err, data) {
+          expect(err).to.not.exist;
+          expect(data.Items).to.have.length.above(0);
+
+          _.each(data.Items, function (t) {
+            expect(t.get('UserId')).to.eql('userid-1');
+            var c = _.contains([4, 6, 8], t.get('num'));
+            expect(c).to.be.true;
+          });
+
+          return done();
+        });
+    });
 
     it('should return tweets that match expression filters', function(done) {
       Tweet.query('userid-1')
@@ -583,6 +599,39 @@ describe('Vogels Integration Tests', function() {
 
         return done();
       });
+    });
+
+    it('should return users between ages', function(done) {
+      User.scan()
+        .where('age').between(18, 22)
+        .where('email').beginsWith('test1')
+        .exec(function (err, data) {
+          expect(err).to.not.exist;
+          expect(data.Items).to.have.length.above(0);
+
+          _.each(data.Items, function (u) {
+            expect(u.get('age')).to.be.within(18, 22);
+            expect(u.get('email')).to.match(/^test1.*/);
+          });
+
+          return done();
+        });
+    });
+
+    it('should return users matching IN filter', function(done) {
+      User.scan()
+        .where('age').in([2, 9, 20])
+        .exec(function (err, data) {
+          expect(err).to.not.exist;
+          expect(data.Items).to.have.length.above(0);
+
+          _.each(data.Items, function (u) {
+            var c = _.contains([2, 9, 20], u.get('age'));
+            expect(c).to.be.true;
+          });
+
+          return done();
+        });
     });
 
     it('should return users with projection expression', function(done) {
