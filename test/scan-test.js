@@ -136,13 +136,15 @@ describe('Scan', function () {
   describe('#attributes', function () {
 
     it('should set array attributes to get', function () {
-      var scan = new Scan(table, serializer).attributes(['created']);
-      scan.request.AttributesToGet.should.eql(['created']);
+      var scan = new Scan(table, serializer).attributes(['created', 'email']);
+      scan.request.ProjectionExpression.should.eql('#created,#email');
+      scan.request.ExpressionAttributeNames.should.eql({'#created' : 'created', '#email' : 'email'});
     });
 
     it('should set single attribute to get', function () {
       var scan = new Scan(table, serializer).attributes('email');
-      scan.request.AttributesToGet.should.eql(['email']);
+      scan.request.ProjectionExpression.should.eql('#email');
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
     });
 
   });

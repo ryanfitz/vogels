@@ -340,13 +340,15 @@ describe('Query', function () {
     });
 
     it('should set array attributes to get', function () {
-      var query = new Query('tim', table, serializer).attributes(['created']);
-      query.request.AttributesToGet.should.eql(['created']);
+      var query = new Query('tim', table, serializer).attributes(['created', 'email']);
+      query.request.ProjectionExpression.should.eql('#created,#email');
+      query.request.ExpressionAttributeNames.should.eql({'#created' : 'created', '#email' : 'email'});
     });
 
     it('should set single attribute to get', function () {
       var query = new Query('tim', table, serializer).attributes('email');
-      query.request.AttributesToGet.should.eql(['email']);
+      query.request.ProjectionExpression.should.eql('#email');
+      query.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
     });
 
   });

@@ -369,6 +369,20 @@ describe('Vogels Integration Tests', function() {
       });
     });
 
+    it('should return users tweets with specific attributes', function(done) {
+      Tweet.query('userid-1').attributes(['num', 'content']).exec(function (err, data) {
+        expect(err).to.not.exist;
+        expect(data.Items).to.have.length.above(0);
+
+        _.each(data.Items, function (t) {
+          expect(t.get('UserId')).to.not.exist;
+          expect(t.get()).to.include.keys('num', 'content');
+        });
+
+        return done();
+      });
+    });
+
     it('should return tweets using secondaryIndex', function(done) {
       Tweet.query('userid-1')
       .usingIndex('PublishedDateTimeIndex')
@@ -506,7 +520,20 @@ describe('Vogels Integration Tests', function() {
 
         return done();
       });
+    });
 
+    it('should return users with specific attributes', function(done) {
+      User.scan()
+        .where('age').gt(18)
+        .attributes(['email', 'roles', 'age']).exec(function (err, data) {
+        expect(err).to.not.exist;
+        expect(data.Items).to.have.length.above(0);
+        _.each(data.Items, function (u) {
+          expect(u.get()).to.include.keys('email', 'roles', 'age');
+        });
+
+        return done();
+      });
     });
 
     it('should return 10 users', function(done) {
