@@ -213,6 +213,27 @@ describe('Vogels Integration Tests', function() {
       });
     });
 
+    it('should return condition exception when using expected shorthand', function(done) {
+      var item = { email : 'test444@test.com', age : 33, roles : ['user'] };
+
+      User.create(item, function (err, acc) {
+        expect(err).to.not.exist;
+        expect(acc).to.exist;
+        expect(acc.get('email')).to.eql('test444@test.com');
+
+        var opts = {expected : {email : 'foo@bar.com'}};
+
+        var item2 = _.merge(item, {id : acc.get('id')});
+        User.create(item2, opts, function (error, acc) {
+          expect(error).to.exist;
+          expect(error.code).to.eql('ConditionalCheckFailedException');
+          expect(acc).to.not.exist;
+
+          return done();
+        });
+      });
+    });
+
     it('should create item with dynamic keys', function(done) {
       DynamicKeyModel.create({
         id : 'rand-1',
@@ -939,6 +960,19 @@ describe('Vogels Integration Tests', function() {
         return done();
       });
     });
+
+    it('should return condition exception when using Expected shorthand', function(done) {
+      var opts = {expected : {id : 'dontexist'}};
+
+      User.destroy({id : 'dontexist'}, opts, function (err, acc) {
+        expect(err).to.exist;
+        expect(err.code).to.eql('ConditionalCheckFailedException');
+        expect(acc).to.not.exist;
+
+        return done();
+      });
+    });
+
   });
 
 

@@ -488,9 +488,9 @@ describe('table', function () {
         Item : {
           email : 'test@test.com',
         },
-        Expected : {
-          name : {Value : 'Foo Bar'}
-        }
+        ExpressionAttributeNames: { '#name': 'name' },
+        ExpressionAttributeValues: { ':name': 'Foo Bar' },
+        ConditionExpression : '(#name = :name)'
       };
 
       docClient.put.withArgs(request).yields(null, {});
@@ -1032,9 +1032,9 @@ describe('table', function () {
         Key : {
           email : 'test@test.com'
         },
-        Expected : {
-          name : {'Value' : 'Foo Bar'}
-        }
+        ExpressionAttributeNames: { '#name': 'name' },
+        ExpressionAttributeValues: { ':name': 'Foo Bar' },
+        ConditionExpression : '(#name = :name)'
       };
 
       docClient.delete.yields(null, {});
