@@ -258,6 +258,29 @@ describe('expressions', function () {
 
     });
 
+    it('should return single REMOVE action when value is set to empty string', function () {
+      var updates = {
+        id : 'foobar',
+        email : '',
+      };
+
+      var result = expressions.serializeUpdateExpression(schema, updates);
+
+      expect(result.expressions).to.eql({
+        SET    : [],
+        ADD    : [],
+        REMOVE : ['#email'],
+        DELETE : [],
+      });
+
+      expect(result.values).to.eql({});
+
+      expect(result.attributeNames).to.eql({
+        '#email' : 'email'
+      });
+
+    });
+
     it('should return empty actions when passed empty object', function () {
       var result = expressions.serializeUpdateExpression(schema, {});
 

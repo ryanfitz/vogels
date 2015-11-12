@@ -81,7 +81,7 @@ describe('Vogels Integration Tests', function() {
       schema : {
         id            : Joi.string().required().default(uuid.v4),
         email         : Joi.string().required(),
-        name          : Joi.string(),
+        name          : Joi.string().allow(''),
         age           : Joi.number().min(10),
         roles         : vogels.types.stringSet().default(['user']),
         acceptedTerms : Joi.boolean().default(false),
@@ -145,6 +145,9 @@ describe('Vogels Integration Tests', function() {
         var items = [{fiz : 3, buz : 5, fizbuz: 35}];
         User.create({id : '123456789', email : 'some@user.com', age: 30, settings : {nickname : 'thedude'}, things : items}, callback);
       },
+      function (callback) {
+        User.create({id : '9999', email : '9999@test.com', age: 99, name: 'Nancy Nine'}, callback);
+      },
       internals.loadSeedData
     ], done);
   });
@@ -158,6 +161,24 @@ describe('Vogels Integration Tests', function() {
         acceptedTerms : true,
         settings : {
           nickname : 'fooos',
+          version : 2
+        }
+      }, function (err, acc) {
+        expect(err).to.not.exist;
+        expect(acc).to.exist;
+        expect(acc.get()).to.have.keys(['id', 'email', 'age', 'roles', 'acceptedTerms', 'settings']);
+        return done();
+      });
+    });
+
+    it('should create item with empty string', function(done) {
+      User.create({
+        email : 'foo2@bar.com',
+        name : '',
+        age : 22,
+        roles : ['user'],
+        settings : {
+          nickname : 'foo2',
           version : 2
         }
       }, function (err, acc) {
@@ -251,6 +272,16 @@ describe('Vogels Integration Tests', function() {
         expect(acc.get()).to.have.keys(['id', 'email', 'age', 'roles', 'acceptedTerms', 'settings', 'things']);
         expect(acc.get('roles').sort()).to.eql(['tester', 'user']);
 
+        return done();
+      });
+    });
+
+    it('should remove name attribute from user record when set to empty string', function(done) {
+      User.update({ id : '9999', name : ''}, function (err, acc) {
+        expect(err).to.not.exist;
+        expect(acc).to.exist;
+
+        expect(acc.get()).to.have.keys(['id', 'email', 'age', 'roles', 'acceptedTerms']);
         return done();
       });
     });

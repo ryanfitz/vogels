@@ -334,6 +334,41 @@ describe('table', function () {
       });
     });
 
+    it('should omit empty values', function (done) {
+      var config = {
+        hashKey: 'email',
+        schema : {
+          email : Joi.string(),
+          name  : Joi.string().allow(''),
+          age   : Joi.number()
+        }
+      };
+
+      var s = new Schema(config);
+
+      table = new Table('accounts', s, realSerializer, docClient, logger);
+
+      var request = {
+        TableName: 'accounts',
+        Item : {
+          email : 'test@test.com',
+          age   : 2
+        }
+      };
+
+      docClient.put.withArgs(request).yields(null, {});
+
+      table.create({email: 'test@test.com', name: '', age: 2}, function (err, account) {
+        expect(err).to.not.exist;
+        account.should.be.instanceof(Item);
+
+        account.get('email').should.equal('test@test.com');
+        account.get('age').should.equal(2);
+
+        done();
+      });
+    });
+
     it('should create item with createdAt timestamp', function (done) {
       var config = {
         hashKey: 'email',
