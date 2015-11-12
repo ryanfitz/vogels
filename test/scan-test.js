@@ -318,8 +318,8 @@ describe('Scan', function () {
       scan = scan.where('email').in(['foo@example.com', 'test@example.com']);
 
       scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
-      scan.request.ExpressionAttributeValues.should.eql({':email_1' : 'foo@example.com', ':email_2' : 'test@example.com'});
-      scan.request.FilterExpression.should.eql('(#email IN (:email_1,:email_2))');
+      scan.request.ExpressionAttributeValues.should.eql({':email' : 'foo@example.com', ':email_2' : 'test@example.com'});
+      scan.request.FilterExpression.should.eql('(#email IN (:email,:email_2))');
     });
 
     it('should have begins with clause', function() {
@@ -346,6 +346,16 @@ describe('Scan', function () {
       scan.request.ExpressionAttributeNames.should.eql({'#name' : 'name', '#email' : 'email'});
       scan.request.ExpressionAttributeValues.should.eql({':name' : 'Tim', ':email' : 'foo'});
       scan.request.FilterExpression.should.eql('(#name = :name) AND (begins_with(#email, :email))');
+    });
+
+    it('should have multiple filters on the same attribute', function() {
+      scan = scan
+        .where('email').gt('foo@example.com')
+        .where('email').lt('moo@example.com');
+
+      scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
+      scan.request.ExpressionAttributeValues.should.eql({':email' : 'foo@example.com', ':email_2' : 'moo@example.com'});
+      scan.request.FilterExpression.should.eql('(#email > :email) AND (#email < :email_2)');
     });
 
     it('should convert date to iso string', function() {

@@ -622,12 +622,10 @@ describe('table', function () {
         TableName: 'accounts',
         Key : { email : 'test@test.com' },
         ReturnValues: 'ALL_OLD',
-        Expected : {
-          name : {'Value' : 'Foo Bar'}
-        },
         UpdateExpression : 'SET #name = :name, #age = :age',
-        ExpressionAttributeValues : { ':name' : 'Tim Test', ':age' : 23},
-        ExpressionAttributeNames : { '#name' : 'name', '#age' : 'age'}
+        ExpressionAttributeValues : { ':name_2' : 'Foo Bar', ':name' : 'Tim Test', ':age' : 23 },
+        ExpressionAttributeNames : { '#name' : 'name', '#age' : 'age'},
+        ConditionExpression : '(#name = :name_2)'
       };
 
       var returnedAttributes = {

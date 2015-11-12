@@ -286,6 +286,26 @@ describe('Vogels Integration Tests', function() {
       });
     });
 
+    it('should update age using expected value', function(done) {
+      User.update({ id : '9999', age : 100}, {expected: {age: 99}}, function (err, acc) {
+        expect(err).to.not.exist;
+        expect(acc).to.exist;
+
+        expect(acc.get('age')).to.eql(100);
+        return done();
+      });
+    });
+
+    it('should update email using expected that an email already exists', function(done) {
+      User.update({ id : '9999', email : 'new9999@test.com'}, {expected: {email: {Exists : true}}}, function (err, acc) {
+        expect(err).to.not.exist;
+        expect(acc).to.exist;
+
+        expect(acc.get('email')).to.eql('new9999@test.com');
+        return done();
+      });
+    });
+
     it('should remove settings attribute from user record', function(done) {
       User.update({ id : '123456789', settings : null}, function (err, acc) {
         expect(err).to.not.exist;
