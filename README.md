@@ -247,8 +247,17 @@ Use expressions api to do conditional writes
   params.ExpressionAttributeNames = {'#i' : 'id'};
   params.ExpressionAttributeValues = {':x' : 123};
 
-  User.create({id : 123, name : 'Kurt Warner' }, params, function (error, acc) {
+  User.create({id : 123, name : 'Kurt Warner' }, params, function (error, acc) { ... });
 ```
+
+Use the `overwrite` option to prevent over writing of existing records.
+  * By default `overwrite` is set to true, allowing create operations to overwrite existing records
+```js
+  // setting overwrite to false will generate
+  // the same Condition Expression as in the previous example
+  User.create({id : 123, name : 'Kurt Warner' }, {overwrite : false}, function (error, acc) { ... });
+```
+
 
 ### Updating
 
