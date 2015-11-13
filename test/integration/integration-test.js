@@ -234,6 +234,24 @@ describe('Vogels Integration Tests', function() {
       });
     });
 
+    it('should return condition exception when using overwrite shorthand', function(done) {
+      var item = { email : 'testOverwrite@test.com', age : 20};
+
+      User.create(item, function (err, acc) {
+        expect(err).to.not.exist;
+        expect(acc).to.exist;
+
+        var item2 = _.merge(item, {id : acc.get('id')});
+        User.create(item2, {overwrite : false}, function (error, acc) {
+          expect(error).to.exist;
+          expect(error.code).to.eql('ConditionalCheckFailedException');
+          expect(acc).to.not.exist;
+
+          return done();
+        });
+      });
+    });
+
     it('should create item with dynamic keys', function(done) {
       DynamicKeyModel.create({
         id : 'rand-1',

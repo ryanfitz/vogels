@@ -555,6 +555,109 @@ describe('table', function () {
       });
     });
 
+    it('should create item with condition expression on hashkey when overwrite flag is false', function (done) {
+      var config = {
+        hashKey: 'email',
+        schema : {
+          email : Joi.string(),
+          name : Joi.string()
+        }
+      };
+
+      var s = new Schema(config);
+
+      table = new Table('accounts', s, realSerializer, docClient, logger);
+
+      var request = {
+        TableName: 'accounts',
+        Item : {
+          email : 'test@test.com',
+          name : 'Bob Tester'
+        },
+        ExpressionAttributeNames: { '#email': 'email' },
+        ExpressionAttributeValues: { ':email': 'test@test.com' },
+        ConditionExpression : '(#email <> :email)'
+      };
+
+      docClient.put.withArgs(request).yields(null, {});
+
+      table.create({email : 'test@test.com', name : 'Bob Tester'}, {overwrite: false}, function (err, account) {
+        expect(err).to.not.exist;
+        account.should.be.instanceof(Item);
+
+        account.get('email').should.equal('test@test.com');
+        done();
+      });
+    });
+
+    it('should create item with condition expression on hash and range key when overwrite flag is false', function (done) {
+      var config = {
+        hashKey: 'email',
+        rangeKey: 'name',
+        schema : {
+          email : Joi.string(),
+          name : Joi.string()
+        }
+      };
+
+      var s = new Schema(config);
+
+      table = new Table('accounts', s, realSerializer, docClient, logger);
+
+      var request = {
+        TableName: 'accounts',
+        Item : {
+          email : 'test@test.com',
+          name : 'Bob Tester'
+        },
+        ExpressionAttributeNames: { '#email': 'email', '#name' : 'name' },
+        ExpressionAttributeValues: { ':email': 'test@test.com', ':name' : 'Bob Tester' },
+        ConditionExpression : '(#email <> :email) AND (#name <> :name)'
+      };
+
+      docClient.put.withArgs(request).yields(null, {});
+
+      table.create({email : 'test@test.com', name : 'Bob Tester'}, {overwrite: false}, function (err, account) {
+        expect(err).to.not.exist;
+        account.should.be.instanceof(Item);
+
+        account.get('email').should.equal('test@test.com');
+        done();
+      });
+    });
+
+    it('should create item without condition expression when overwrite flag is true', function (done) {
+      var config = {
+        hashKey: 'email',
+        schema : {
+          email : Joi.string(),
+          name : Joi.string()
+        }
+      };
+
+      var s = new Schema(config);
+
+      table = new Table('accounts', s, realSerializer, docClient, logger);
+
+      var request = {
+        TableName: 'accounts',
+        Item : {
+          email : 'test@test.com',
+          name : 'Bob Tester'
+        }
+      };
+
+      docClient.put.withArgs(request).yields(null, {});
+
+      table.create({email : 'test@test.com', name : 'Bob Tester'}, {overwrite: true}, function (err, account) {
+        expect(err).to.not.exist;
+        account.should.be.instanceof(Item);
+
+        account.get('email').should.equal('test@test.com');
+        done();
+      });
+    });
+
   });
 
   describe('#update', function () {
