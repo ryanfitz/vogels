@@ -266,6 +266,19 @@ describe('Vogels Integration Tests', function() {
       });
     });
 
+    it('should create multiple items at once', function (done) {
+      var item = { email : 'testMulti1@test.com', age : 10};
+      var item2 = { email : 'testMulti2@test.com', age : 20};
+      var item3 = { email : 'testMulti3@test.com', age : 30};
+
+      User.create([item, item2, item3], function (err, accounts) {
+        expect(err).to.not.exist;
+        expect(accounts).to.exist;
+        expect(accounts).to.have.length(3);
+
+        return done();
+      });
+    });
   });
 
   describe('#get', function () {
