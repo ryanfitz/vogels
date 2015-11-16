@@ -38,7 +38,7 @@ describe('table', function () {
 
       var s = new Schema(config);
 
-      table = new Table('accounts', s, realSerializer, docClient, logger, logger);
+      table = new Table('accounts', s, realSerializer, docClient, logger);
 
       var request = {
         TableName: 'accounts',
@@ -1356,7 +1356,7 @@ describe('table', function () {
 
       var s = new Schema(config);
 
-      table = new Table('gameScores', s, serializer, docClient);
+      table = new Table('gameScores', s, serializer, docClient, logger);
 
       var request = {
         TableName: 'gameScores',
@@ -1416,7 +1416,7 @@ describe('table', function () {
 
       var s = new Schema(config);
 
-      table = new Table('gameScores', s, serializer, docClient);
+      table = new Table('gameScores', s, serializer, docClient, logger);
 
       var request = {
         TableName: 'gameScores',
