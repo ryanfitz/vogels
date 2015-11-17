@@ -280,7 +280,7 @@ describe('Query', function () {
       serializer.serializeItem.returns({age: {N: '18'}});
 
       var query = new Query(18, table, serializer).usingIndex('UserAgeIndex');
-      query.buildRequest();
+      query.exec();
 
       query.request.IndexName.should.equal('UserAgeIndex');
 
@@ -479,7 +479,7 @@ describe('Query', function () {
 
     it('should have hash key and range key equals clauses', function() {
       query = query.where('email').equals('foo@example.com');
-      query.buildRequest();
+      query.exec();
 
       query.request.ExpressionAttributeNames.should.eql({'#email' : 'email', '#name' : 'name'});
       query.request.ExpressionAttributeValues.should.eql({':email' : 'foo@example.com', ':name' : 'tim'});
