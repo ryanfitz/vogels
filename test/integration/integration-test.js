@@ -612,12 +612,34 @@ describe('Vogels Integration Tests', function() {
       });
     });
 
+    it('should return all tweets from user', function(done) {
+      Tweet.query('userid-1').limit(2).loadAll().exec(function (err, data) {
+        expect(err).to.not.exist;
+        expect(data.Items).to.have.length.above(0);
+
+        _.each(data.Items, function (t) {
+          expect(t.get('UserId')).to.eql('userid-1');
+        });
+
+        return done();
+      });
+    });
+
   });
 
 
   describe('#scan', function () {
     it('should return all users', function(done) {
       User.scan().loadAll().exec(function (err, data) {
+        expect(err).to.not.exist;
+        expect(data.Items).to.have.length.above(0);
+
+        return done();
+      });
+    });
+
+    it('should return all users with limit', function(done) {
+      User.scan().limit(2).loadAll().exec(function (err, data) {
         expect(err).to.not.exist;
         expect(data.Items).to.have.length.above(0);
 
