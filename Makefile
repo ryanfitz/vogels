@@ -1,5 +1,5 @@
 REPORTER ?= list
-SRC = $(shell find lib -name "*.js" -type f | sort)
+SRC = $(shell find index.js lib -name "*.js" -type f | sort)
 TESTSRC = $(shell find test -name "*.js" -type f | sort)
 
 default: test
