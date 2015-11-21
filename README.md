@@ -161,7 +161,7 @@ You can override the table name the model will use.
 
 ```js
 var Event = vogels.define('Event', {
-  hashkey : 'name',
+  hashKey : 'name',
   schema : {
     name : Joi.string(),
     total : Joi.number()
@@ -176,7 +176,7 @@ Useful for storing time series data.
 
 ```js
 var Event = vogels.define('Event', {
-  hashkey : 'name',
+  hashKey : 'name',
   schema : {
     name : Joi.string(),
     total : Joi.number()
@@ -675,7 +675,7 @@ First, define a model using a local secondary index
 
 ```js
 var BlogPost = vogels.define('Account', {
-  hashkey : 'email',
+  hashKey : 'email',
   rangekey : 'title',
   schema : {
     email             : Joi.string().email(),
@@ -960,7 +960,7 @@ vogels supports dynamic table names, useful for storing time series data.
 
 ```js
 var Event = vogels.define('Event', {
-  hashkey : 'name',
+  hashKey : 'name',
   schema : {
     name : Joi.string(),
     total : Joi.number()
