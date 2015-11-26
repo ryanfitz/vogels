@@ -584,7 +584,7 @@ describe('Query', function () {
       query = query.filter('age').exists();
 
       query.request.ExpressionAttributeNames.should.eql({'#age' : 'age'});
-      query.request.ExpressionAttributeValues.should.eql({});
+      expect(query.request.ExpressionAttributeValues).to.not.exist;
       query.request.FilterExpression.should.eql('(attribute_exists(#age))');
     });
 
@@ -592,7 +592,7 @@ describe('Query', function () {
       query = query.filter('age').exists(false);
 
       query.request.ExpressionAttributeNames.should.eql({'#age' : 'age'});
-      query.request.ExpressionAttributeValues.should.eql({});
+      expect(query.request.ExpressionAttributeValues).to.not.exist;
       query.request.FilterExpression.should.eql('(attribute_not_exists(#age))');
     });
 

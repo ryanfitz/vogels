@@ -278,7 +278,7 @@ describe('Scan', function () {
       scan = scan.where('email').notNull();
 
       scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
-      scan.request.ExpressionAttributeValues.should.eql({});
+      expect(scan.request.ExpressionAttributeValues).to.not.exist;
       scan.request.FilterExpression.should.eql('(attribute_exists(#email))');
     });
 
@@ -286,7 +286,7 @@ describe('Scan', function () {
       scan = scan.where('email').null();
 
       scan.request.ExpressionAttributeNames.should.eql({'#email' : 'email'});
-      scan.request.ExpressionAttributeValues.should.eql({});
+      expect(scan.request.ExpressionAttributeValues).to.not.exist;
       scan.request.FilterExpression.should.eql('(attribute_not_exists(#email))');
     });
 
