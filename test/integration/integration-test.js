@@ -559,6 +559,22 @@ describe('Vogels Integration Tests', function() {
       });
     });
 
+    it('should return tweets that match exists filter', function(done) {
+      Tweet.query('userid-1')
+        .filter('tag').exists()
+        .exec(function (err, data) {
+          expect(err).to.not.exist;
+          expect(data.Items).to.have.length.above(0);
+
+          _.each(data.Items, function (t) {
+            expect(t.get('UserId')).to.eql('userid-1');
+            expect(t.get('tag')).to.exist();
+          });
+
+          return done();
+        });
+    });
+
     it('should return tweets that match IN filter', function(done) {
       Tweet.query('userid-1')
         .filter('num').in([4, 6, 8])
@@ -826,6 +842,19 @@ describe('Vogels Integration Tests', function() {
 
       stream.on('end', function () {
         expect(called).to.be.true;
+        return done();
+      });
+    });
+
+    it('should load tweets using not null tag clause', function(done) {
+      Tweet.scan().where('tag').notNull().exec(function (err, data) {
+        expect(err).to.not.exist;
+        expect(data.Items).to.have.length.above(0);
+
+        _.each(data.Items, function (t) {
+          expect(t.get('tag')).to.exist;
+        });
+
         return done();
       });
     });
