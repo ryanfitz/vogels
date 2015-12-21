@@ -1,6 +1,6 @@
 {
   "name": "vogels",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "author": "Ryan Fitzgerald <ryan@codebrewstudios.com>",
   "description": "DynamoDB data mapper",
   "main": "index.js",
