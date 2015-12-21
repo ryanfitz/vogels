@@ -358,3 +358,70 @@ describe('Create Tables Integration Tests', function() {
   });
 });
 
+describe('Update Tables Integration Tests', function() {
+  this.timeout(0);
+  var Tweet,
+      tableName;
+
+  before(function (done) {
+    vogels.dynamoDriver(helper.realDynamoDB());
+
+    tableName = helper.randomName('vogels-updateTable-Tweets');
+
+    Tweet = vogels.define('vogels-update-table-test', {
+      hashKey  : 'UserId',
+      rangeKey : 'TweetID',
+      tableName : tableName,
+      schema : {
+        UserId            : Joi.string(),
+        TweetID           : vogels.types.uuid(),
+        content           : Joi.string(),
+        PublishedDateTime : Joi.date().default(Date.now)
+      }
+    });
+
+    vogels.createTables(done);
+  });
+
+  afterEach(function () {
+    vogels.reset();
+  });
+
+  it('should add global secondary index', function (done) {
+    Tweet = vogels.define('vogels-update-table-test', {
+      hashKey  : 'UserId',
+      rangeKey : 'TweetID',
+      tableName : tableName,
+      schema : {
+        UserId            : Joi.string(),
+        TweetID           : vogels.types.uuid(),
+        content           : Joi.string(),
+        PublishedDateTime : Joi.date().default(Date.now)
+      },
+      indexes : [
+        { hashKey : 'UserId', rangeKey : 'PublishedDateTime', type : 'global', name : 'PublishedDateTimeIndex'}
+      ]
+    });
+
+    Tweet.updateTable(function (err) {
+      expect(err).to.not.exist;
+
+      Tweet.describeTable(function (err, data) {
+        expect(err).to.not.exist;
+
+        var globalIndexes = _.get(data, 'Table.GlobalSecondaryIndexes');
+        expect(globalIndexes).to.have.length(1);
+
+        var idx = _.first(globalIndexes);
+        expect(idx.IndexName).to.eql('PublishedDateTimeIndex');
+        expect(idx.KeySchema).to.eql([{AttributeName: 'UserId', KeyType: 'HASH'},
+                                      {AttributeName: 'PublishedDateTime', KeyType:'RANGE'}]);
+        expect(idx.Projection).to.eql({ProjectionType : 'ALL'});
+
+        return done();
+      });
+    });
+
+  });
+
+});

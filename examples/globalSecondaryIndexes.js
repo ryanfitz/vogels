@@ -7,9 +7,11 @@ var vogels = require('../index'),
     Joi    = require('joi'),
     async  = require('async');
 
-AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
+// AWS.config.loadFromPath(process.env.HOME + '/.ec2/credentials.json');
 
 // http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html
+
+AWS.config.update({region : 'us-east-1'});
 
 var GameScore = vogels.define('example-global-index', {
   hashKey : 'userId',
@@ -28,7 +30,9 @@ var GameScore = vogels.define('example-global-index', {
     name : 'GameTitleIndex',
     type : 'global',
     projection: { NonKeyAttributes: [ 'wins' ], ProjectionType: 'INCLUDE' }
-  }]
+  },
+  { hashKey : 'gameTitle', rangeKey : 'losses', name : 'GameLosersIndex', type : 'global'}
+  ]
 });
 
 var data = [

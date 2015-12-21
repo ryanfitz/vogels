@@ -1508,6 +1508,7 @@ describe('table', function () {
         ProvisionedThroughput: { ReadCapacityUnits: 4, WriteCapacityUnits: 2 }
       };
 
+      dynamodb.describeTable.yields(null, {});
       dynamodb.updateTable.yields(null, {});
 
       table.updateTable({readCapacity: 4, writeCapacity: 2}, function (err) {
