@@ -584,7 +584,7 @@ describe('Vogels Integration Tests', function() {
 
           _.each(data.Items, function (t) {
             expect(t.get('UserId')).to.eql('userid-1');
-            var c = _.contains([4, 6, 8], t.get('num'));
+            var c = _.includes([4, 6, 8], t.get('num'));
             expect(c).to.be.true;
           });
 
@@ -794,7 +794,7 @@ describe('Vogels Integration Tests', function() {
           expect(data.Items).to.have.length.above(0);
 
           _.each(data.Items, function (u) {
-            var c = _.contains([2, 9, 20], u.get('age'));
+            var c = _.includes([2, 9, 20], u.get('age'));
             expect(c).to.be.true;
           });
 
