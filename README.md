@@ -90,6 +90,45 @@ var BlogPost = vogels.define('BlogPost', {
 });
 ```
 
+### Create Tables for all defined modules
+
+```js
+vogels.createTables(function(err) {
+  if (err) {
+    console.log('Error creating tables: ', err);
+  } else {
+    console.log('Tables has been created');
+  }
+});
+```
+
+When creating tables you can pass specific throughput settings for any defined models.
+
+```js
+vogels.createTables({
+  'BlogPost': {readCapacity: 5, writeCapacity: 10},
+  'Account': {readCapacity: 20, writeCapacity: 4}
+}, function(err) {
+  if (err) {
+    console.log('Error creating tables: ', err);
+  } else {
+    console.log('Tables has been created');
+  }
+});
+```
+
+### Delete Table
+
+```js
+BlogPost.deleteTable(function(err) {
+  if (err) {
+    console.log('Error deleting table: ', err);
+  } else {
+    console.log('Table has been deleted');
+  }
+});
+```
+
 ### Schema Types
 Vogels provides the following schema types:
 
@@ -1040,7 +1079,7 @@ Vogels is provided as-is, free of charge. For support, you have a few choices:
 
 (The MIT License)
 
-Copyright (c) 2015 Ryan Fitzgerald
+Copyright (c) 2016 Ryan Fitzgerald
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
