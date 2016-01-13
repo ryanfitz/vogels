@@ -74,9 +74,11 @@ var Account = vogels.define('Account', {
     }
   },
   
-  // *optional* add some instance methods
+  // custom instance methods
   methods : {
-    fullname: function(){ return this.get('fistname') + ' ' + this.get('lastname') ; }
+    fullname: function(){ 
+        return this.get('fistname') + ' ' + this.get('lastname') ; 
+    }
   }
 });
 ```
