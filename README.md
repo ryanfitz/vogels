@@ -63,14 +63,20 @@ var Account = vogels.define('Account', {
   timestamps : true,
 
   schema : {
-    email   : Joi.string().email(),
-    name    : Joi.string(),
-    age     : Joi.number(),
-    roles   : vogels.types.stringSet(),
-    settings : {
+    email       : Joi.string().email(),
+    firstname   : Joi.string(),
+    lastname    : Joi.string(),
+    age         : Joi.number(),
+    roles       : vogels.types.stringSet(),
+    settings    : {
       nickname      : Joi.string(),
       acceptedTerms : Joi.boolean().default(false)
     }
+  },
+  
+  // *optional* add some instance methods
+  methods : {
+    fullname: function(){ return this.get('fistname') + ' ' + this.get('lastname') ; }
   }
 });
 ```
@@ -207,6 +213,30 @@ Account.config({dynamodb: dynamodb});
 // all defined models will now use this driver
 vogels.dynamoDriver(dynamodb);
 ```
+
+Want to define some custom instance methods for your models? Just create a methods object in your schema definition with your custom methods:
+
+**WARNING: your custom methods will override vogel's methods that have the same name!**
+
+```js
+var Event = vogels.define('Event', {
+  hashKey : 'lastname',
+  schema : {
+    firstname : Joi.string(),
+    lastname : Joi.string()
+  },
+  methods: {
+    fullname: function(){
+        return this.get('firstname') + ' ' + this.get('lastname');
+    }
+  }
+});
+
+var evt = new Event({firstname: 'John',lastname: 'Appleseed'});
+console.log(evt.fullname()); //John Appleseed
+
+```
+
 
 ### Saving Models to DynamoDB
 With your models defined, we can start saving them to DynamoDB.
