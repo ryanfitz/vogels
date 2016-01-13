@@ -214,7 +214,7 @@ Account.config({dynamodb: dynamodb});
 vogels.dynamoDriver(dynamodb);
 ```
 
-Want to define some custom instance methods for your models? Just create a methods object in your schema definition with your custom methods:
+Whant to define some custom instance methods for your models? Just create a methods object in your schema definition with your custom methods:
 
 **WARNING: your custom methods will override vogel's methods that have the same name!**
 
@@ -234,7 +234,6 @@ var Event = vogels.define('Event', {
 
 var evt = new Event({firstname: 'John',lastname: 'Appleseed'});
 console.log(evt.fullname()); //John Appleseed
-
 ```
 
 
