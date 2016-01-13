@@ -90,6 +90,32 @@ var BlogPost = vogels.define('BlogPost', {
 });
 ```
 
+### Creating the Table
+
+```js
+vogels.createTables({
+  'BlogPost': {readCapacity: 1, writeCapacity: 1},
+}, function(err) {
+  if (err) {
+    console.log('Error creating table: ', err);
+  } else {
+    console.log('Table has been created');
+  }
+});
+```
+
+### Deleting the Table
+
+```js
+BlogPost.deleteTable(function(err) {
+  if (err) {
+    console.log('Error deleting table: ', err);
+  } else {
+    console.log('Table has been deleted');
+  }
+});
+```
+
 ### Schema Types
 Vogels provides the following schema types:
 
