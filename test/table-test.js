@@ -707,6 +707,41 @@ describe('table', function () {
       });
     });
 
+    it('should accept falsy key and range values', function (done) {
+      var config = {
+          hashKey: 'userId',
+          rangeKey: 'timeOffset',
+          schema : {
+              hashKey  : Joi.number(),
+              rangeKey : Joi.number()
+          }
+      };
+
+      var s = new Schema(config);
+
+      table = new Table('users', s, realSerializer, docClient, logger);
+
+      var request = {
+          TableName: 'users',
+          Key : { userId : 0, timeOffset : 0},
+          ReturnValues: 'ALL_NEW'
+      };
+
+      var returnedAttributes = {userId : 0, timeOffset : 0};
+
+      docClient.update.withArgs(request).yields(null, {Attributes: returnedAttributes});
+
+      var item = {userId : 0, timeOffset : 0};
+      table.update(item, function (err, user) {
+          user.should.be.instanceof(Item);
+
+          user.get('userId').should.equal(0);
+          user.get('timeOffset').should.equal(0);
+
+          done();
+      });
+    });
+
     it('should update with passed in options', function (done) {
       var config = {
         hashKey: 'email',
