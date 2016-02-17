@@ -984,6 +984,40 @@ describe('table', function () {
       });
     });
 
+    it('should destroy valid item with falsy hash and range keys', function (done) {
+      var config = {
+        hashKey: 'userId',
+        rangeKey: 'timeOffset',
+        schema : {
+          hashKey  : Joi.number(),
+          rangeKey : Joi.number()
+        }
+      };
+
+      var s = new Schema(config);
+
+      table = new Table('users', s, serializer, docClient, logger);
+
+      var request = {
+        TableName: 'users',
+        Key : {
+          userId : 0,
+          timeOffset : 0
+        }
+      };
+
+      docClient.delete.yields(null, {});
+
+      serializer.buildKey.returns(request.Key);
+
+      table.destroy({userId: 0, timeOffset: 0}, function () {
+        serializer.buildKey.calledWith(0, 0, s).should.be.true;
+        docClient.delete.calledWith(request).should.be.true;
+
+        done();
+      });
+    });
+
     it('should take optional params', function (done) {
       var config = {
         hashKey: 'email',
