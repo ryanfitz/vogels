@@ -376,7 +376,7 @@ describe('Update Tables Integration Tests', function() {
         UserId            : Joi.string(),
         TweetID           : vogels.types.uuid(),
         content           : Joi.string(),
-        PublishedDateTime : Joi.date().default(Date.now)
+        PublishedDateTime : Joi.date().default(Date.now, 'description for PublishedDateTime')
       }
     });
 

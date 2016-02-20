@@ -104,7 +104,7 @@ describe('Vogels Integration Tests', function() {
         content           : Joi.string(),
         num               : Joi.number(),
         tag               : Joi.string(),
-        PublishedDateTime : Joi.date().default(Date.now)
+        PublishedDateTime : Joi.date().default(Date.now, 'description for PublishedDateTime')
       },
       indexes : [
         { hashKey : 'UserId', rangeKey : 'PublishedDateTime', type : 'local', name : 'PublishedDateTimeIndex'}
@@ -124,7 +124,7 @@ describe('Vogels Integration Tests', function() {
           lastName  : Joi.string(),
           titles    : Joi.array()
         }),
-        actors : Joi.array().includes(Joi.object().keys({
+        actors : Joi.array().items(Joi.object().keys({
           firstName : Joi.string(),
           lastName  : Joi.string(),
           titles    : Joi.array()
