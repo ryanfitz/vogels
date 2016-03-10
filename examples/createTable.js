@@ -40,8 +40,8 @@ vogels.define('example-GameScore', {
 });
 
 vogels.createTables({
-  'Account'   : {readCapacity: 1, writeCapacity: 1},
-  'GameScore' : {readCapacity: 1, writeCapacity: 1}
+  'example-Account'   : {readCapacity: 1, writeCapacity: 1},
+  'example-GameScore' : {readCapacity: 1, writeCapacity: 1}
 }, function (err) {
   if(err) {
     console.log('Error creating tables', err);
