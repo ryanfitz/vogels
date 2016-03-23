@@ -90,7 +90,7 @@ var BlogPost = vogels.define('BlogPost', {
 });
 ```
 
-### Create Tables for all defined modules
+### Create Tables for all defined models
 
 ```js
 vogels.createTables(function(err) {
