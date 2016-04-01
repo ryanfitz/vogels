@@ -436,6 +436,7 @@ Account.destroy('foo@example.com', {ReturnValues: true}, function (err, acc) {
 
 Account.destroy('foo@example.com', {expected: {age: 22}}, function (err) {
   console.log('account deleted if the age was 22');
+});
 ```
 
 
