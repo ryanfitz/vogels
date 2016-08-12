@@ -872,6 +872,27 @@ describe('table', function () {
       });
     });
 
+    it('should handle errors regarding invalid expressions', function (done) {
+      var config = {
+        hashKey: 'name',
+        schema : {
+          name     : Joi.string(),
+          birthday : Joi.date().iso()
+        }
+      };
+
+      var s = new Schema(config);
+
+      table = new Table('accounts', s, realSerializer, docClient, logger);
+
+      var item = {name : 'Dr. Who', birthday: undefined};
+
+      table.update(item, function (err, account) {
+        expect(err).to.exist;
+        expect(account).to.not.exist;
+        done();
+      });
+    });
   });
 
   describe('#query', function () {
