@@ -562,7 +562,8 @@ describe('Query', function () {
           name : Joi.string(),
           email : Joi.string(),
           created : Joi.date(),
-          age : Joi.number()
+          age : Joi.number(),
+          data : Joi.object(),
         },
         indexes : [{ hashKey : 'name', rangeKey : 'created', type : 'local', name : 'CreatedIndex'}]
       };
@@ -618,6 +619,14 @@ describe('Query', function () {
       query.request.ExpressionAttributeNames.should.eql({'#age' : 'age'});
       query.request.ExpressionAttributeValues.should.eql({':age' : 5, ':age_2' : 20, ':age_3' : 15});
       query.request.FilterExpression.should.eql('(#age > :age) AND (#age < :age_2) AND (#age <> :age_3)');
+    });
+
+    it('should support Map.Attr document paths', function() {
+      query = query.filter('data.attr').equals(15);
+
+      query.request.ExpressionAttributeNames.should.eql({'#data' : 'data', '#attr' : 'attr'});
+      query.request.ExpressionAttributeValues.should.eql({':data_attr' : 15});
+      query.request.FilterExpression.should.eql('(#data.#attr = :data_attr)');
     });
 
   });
