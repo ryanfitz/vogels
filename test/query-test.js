@@ -624,9 +624,9 @@ describe('Query', function () {
     it('should support Map.Attr document paths', function() {
       query = query.filter('data.attr').equals(15);
 
-      query.request.ExpressionAttributeNames.should.eql({'#data' : 'data'});
+      query.request.ExpressionAttributeNames.should.eql({'#data' : 'data', '#attr' : 'attr'});
       query.request.ExpressionAttributeValues.should.eql({':data_attr' : 15});
-      query.request.FilterExpression.should.eql('(#data.attr = :data_attr)');
+      query.request.FilterExpression.should.eql('(#data.#attr = :data_attr)');
     });
 
   });
