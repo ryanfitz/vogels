@@ -6,7 +6,7 @@ var vogels = require('../../index'),
     async  = require('async'),
     _      = require('lodash'),
     helper = require('../test-helper'),
-    uuid   = require('node-uuid'),
+    uuid   = require('uuid'),
     Joi    = require('joi');
 
 chai.should();
