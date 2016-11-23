@@ -250,6 +250,19 @@ describe('schema', function () {
       }).to.throw(/hashKey is required/);
     });
 
+    it('should throw when method is not a function', function () {
+      var config = {
+        hashKey : 'foo',
+        methods: {
+          bar: "value"
+        }
+      };
+
+      expect(function () {
+        new Schema(config);
+      }).to.throw(/bar must be a Function/);
+    });
+
     it('should parse schema data types', function () {
       var config = {
         hashKey : 'foo',

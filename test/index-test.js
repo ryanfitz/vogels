@@ -62,6 +62,20 @@ describe('vogels', function () {
       acc.table.should.be.instanceof(Table);
     });
 
+    it('should return new account item with a custom method', function () {
+      var Account = vogels.define('Account', {
+        hashKey : 'id',
+        methods: {
+          customMethod: function(){
+            return this.get('name')
+          }
+        }
+      });
+
+      var acc = new Account({name: 'Test Acc'});
+      acc.customMethod().should.be.equal('Test Acc');
+    });
+
   });
 
   describe('#models', function () {
