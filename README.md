@@ -31,7 +31,7 @@ vogels.AWS.config.update({region: "REGION"}); // region must be set
 ```
 
 You can also directly pass in your access key id, secret and region.
-  * Its recommend you not hard-code credentials inside an application. Use this method only for small personal scripts or for testing purposes.
+  * It is NOT recommend to hard-code credentials inside an application. Use this method only for small personal scripts or for testing purposes. **Avoid for production.**
 
 ```js
 var vogels = require('vogels');
@@ -43,14 +43,21 @@ Currently the following region codes are available in Amazon:
 |      Code      |           Name           |
 | -------------- | ------------------------ |
 | ap-northeast-1 | Asia Pacific (Tokyo)     |
+| ap-northeast-2 | Asia Pacific (Seoul)     |
+| ap-south-1     | Asia Pacific (Mumbai)    |
 | ap-southeast-1 | Asia Pacific (Singapore) |
 | ap-southeast-2 | Asia Pacific (Sydney)    |
+| ca-central-1   | Canada (Central)         |
 | eu-central-1   | EU (Frankfurt)           |
 | eu-west-1      | EU (Ireland)             |
+| eu-west-2      | EU (London)              |
 | sa-east-1      | South America (Sao Paulo)|
 | us-east-1      | US East (N. Virginia)    |
+| us-east-2      | US East (Ohio)           |
 | us-west-1      | US West (N. California)  |
 | us-west-2      | US West (Oregon)         |
+
+For the most up-to-date list of endpoints, please refer to [AWS Regions and Engpoints for Amazon DynamoDB](http://docs.aws.amazon.com/general/latest/gr/rande.html#ddb_region).
 
 ### Define a Model
 Models are defined through the toplevel define method.
@@ -80,7 +87,7 @@ Models can also be defined with hash and range keys.
 ```js
 var BlogPost = vogels.define('BlogPost', {
   hashKey : 'email',
-  rangeKey : ‘title’,
+  rangeKey : 'title',
   schema : {
     email   : Joi.string().email(),
     title   : Joi.string(),
