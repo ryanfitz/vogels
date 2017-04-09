@@ -14,7 +14,6 @@ vogels is a [DynamoDB][5] data mapper for [node.js][1].
 ## Installation
 
     npm install vogels
-
 ## Getting Started
 First, you need to configure the [AWS SDK][2] with your credentials.
 
@@ -53,7 +52,13 @@ Currently the following region codes are available in Amazon:
 | us-west-2      | US West (Oregon)         |
 
 ### Define a Model
-Models are defined through the toplevel define method.
+The [Joi module](https://github.com/hapijs/joi) is used for defining schemas and needs to be imported:
+
+```
+var Joi = require('joi');`
+```
+
+Models are defined through the toplevel define method. 
 
 ```js
 var Account = vogels.define('Account', {
