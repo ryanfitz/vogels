@@ -670,7 +670,7 @@ GameScore
 ```
 
 When can also configure the attributes projected into the index.
-By default all attributes will be projected when no Projection pramater is
+By default all attributes will be projected when no Projection paramater is
 present 
 
 ```js
