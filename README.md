@@ -80,7 +80,7 @@ Models can also be defined with hash and range keys.
 ```js
 var BlogPost = vogels.define('BlogPost', {
   hashKey : 'email',
-  rangeKey : ‘title’,
+  rangeKey : 'title',
   schema : {
     email   : Joi.string().email(),
     title   : Joi.string(),
