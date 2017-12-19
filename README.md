@@ -724,7 +724,7 @@ var BlogPost = vogels.define('Account', {
   },
 
   indexes : [{
-    hashkey : 'email', rangekey : 'PublishedDateTime', type : 'local', name : 'PublishedIndex'
+    hashKey : 'email', rangeKey : 'PublishedDateTime', type : 'local', name : 'PublishedIndex'
   }]
 });
 ```
